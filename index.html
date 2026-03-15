@@ -580,10 +580,19 @@ function startItemsListener(){
   // Listen to ALL items (we filter by date in render)
   db.ref('items').on('value', function(snap){
     S.items = snap.val() || {};
+    // Normalize keys from Firebase (__) back to local (|)
+    var raw = snap.val() || {}, normalized = {};
+    Object.keys(raw).forEach(function(k){ normalized[k.replace(/__/g,'|')] = raw[k]; });
+    S.items = normalized;
     if(document.getElementById('sApp').classList.contains('active')){
-      renderAll();
-      renderLog();
-      buildCal();
+      // Don't re-render if user is currently typing in an amount input
+      var activeEl = document.activeElement;
+      var isTypingAmount = activeEl && activeEl.classList.contains('amt-in');
+      if(!isTypingAmount){
+        renderAll();
+        renderLog();
+        buildCal();
+      }
     }
   });
 }
@@ -641,13 +650,17 @@ db.ref('items').on('value', function(snap){
   var raw=snap.val()||{};
   var normalized={};
   Object.keys(raw).forEach(function(k){
-    // Convert __ back to | for local use
     var localKey=k.replace(/__/g,'|');
     normalized[localKey]=raw[k];
   });
   S.items=normalized;
   if(document.getElementById('sApp').classList.contains('active')){
-    renderAll();renderLog();buildCal();
+    // Don't re-render if user is currently typing in an amount input
+    var activeEl = document.activeElement;
+    var isTypingAmount = activeEl && activeEl.classList.contains('amt-in');
+    if(!isTypingAmount){
+      renderAll();renderLog();buildCal();
+    }
   }
 });
 
@@ -979,7 +992,7 @@ function renderPanel(tab){
       html+='<div class="pi'+(s.done?' done':'')+'">'+
         '<div class="pi-check" onclick="toggleDone(\''+tab+'\',\''+d+'\',\''+esc+'\')">'+(s.done?'&#10003;':'')+'</div>'+
         '<div class="pi-name">'+item+'</div>'+
-        '<input class="amt-in'+(s.amount?' hv':'')+'" type="text" placeholder="Amount" value="'+amt+'" oninput="updAmt(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onclick="event.stopPropagation()">'+
+        '<input class="amt-in'+(s.amount?' hv':'')+'" type="text" placeholder="Amount" value="'+amt+'" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" oninput="updAmt(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onblur="updAmtBlur(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">'+
         '<div class="pi-dby'+(s.by?'':' mt')+'">'+(s.by?'&#10003; '+s.by+'<br>'+s.time:'-')+'</div></div>';
     });
     html+='</div>';
@@ -1014,6 +1027,11 @@ function toggleDone(tab,d,item){
 function updAmt(tab,d,item,input){
   var s=getIt(tab,d,item);setIt(tab,d,item,{done:s.done,amount:input.value,by:s.by,time:s.time});
   input.className='amt-in'+(input.value?' hv':'');
+  // Do NOT call renderPanel here - it destroys the input and closes the keyboard
+}
+function updAmtBlur(tab,d,item,input){
+  // Only update stats/calendar after user finishes typing (on blur)
+  updateStats();buildCal();
 }
 function renderLog(){
   var el=document.getElementById('logEl');if(!el)return;
