@@ -992,7 +992,7 @@ function renderPanel(tab){
       html+='<div class="pi'+(s.done?' done':'')+'">'+
         '<div class="pi-check" onclick="toggleDone(\''+tab+'\',\''+d+'\',\''+esc+'\')">'+(s.done?'&#10003;':'')+'</div>'+
         '<div class="pi-name">'+item+'</div>'+
-        '<input class="amt-in'+(s.amount?' hv':'')+'" type="text" placeholder="Amount" value="'+amt+'" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" oninput="updAmt(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onblur="updAmtBlur(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">'+
+        '<input class="amt-in'+(s.amount?' hv':'')+'" type="text" placeholder="Amount" value="'+amt+'" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" oninput="updAmt(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onblur="updAmtBlur(\''+tab+'\',\''+d+'\',\''+esc+'\',this)" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">'+
         '<div class="pi-dby'+(s.by?'':' mt')+'">'+(s.by?'&#10003; '+s.by+'<br>'+s.time:'-')+'</div></div>';
     });
     html+='</div>';
