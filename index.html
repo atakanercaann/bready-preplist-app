@@ -450,7 +450,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <button class="stab cl"         id="tab-cl"   onclick="switchTab('closer')">&#x1F319; Closer<span class="cnt" id="tc-cl">0/0</span></button>
     </div>
     <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Search prep items..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
+      <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
     </div>
   </div>
   <div class="app-body">
@@ -1112,8 +1112,11 @@ function updateStats(){
 }
 function switchTab(tab){
   cTab=tab;
-  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  // Clear search when manually switching tab
+  var si=document.getElementById('prepSearch');
+  if(si&&si.value){si.value='';filterItems('');}
+  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');t.style.opacity='';});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');p.style.display='';});
   var m={hot:'hot',cold:'cold',closer:'cl'};
   document.getElementById('tab-'+m[tab]).classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
@@ -1199,6 +1202,19 @@ function showToast(msg,warn){clearTimeout(_tt);var t=document.getElementById('to
 // ============================================================
 function filterItems(q){
   q=q.toLowerCase().trim();
+  var panels=document.querySelectorAll('.panel');
+  if(q){
+    // Show ALL panels so results from every station are visible
+    panels.forEach(function(p){p.style.display='block';});
+    // Hide tab bar hint — show all
+    document.querySelectorAll('.stab').forEach(function(t){t.style.opacity='0.4';});
+  } else {
+    // Restore normal tab view
+    panels.forEach(function(p){p.style.display='';});
+    document.querySelectorAll('.stab').forEach(function(t){t.style.opacity='';});
+    switchTab(cTab);
+  }
+  // Filter items across all panels
   document.querySelectorAll('.sg').forEach(function(sg){
     var items=sg.querySelectorAll('.pi');
     var sgVisible=false;
@@ -1210,6 +1226,12 @@ function filterItems(q){
       if(match)sgVisible=true;
     });
     sg.classList.toggle('hidden',!sgVisible&&!!q);
+  });
+  // Also show/hide station headers (panel titles) based on whether they have results
+  document.querySelectorAll('.panel').forEach(function(panel){
+    if(!q){return;}
+    var hasVisible=panel.querySelectorAll('.pi:not(.hidden)').length>0;
+    panel.style.display=hasVisible?'block':'none';
   });
 }
 
