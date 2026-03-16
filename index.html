@@ -242,6 +242,53 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s2);border:1px solid var(--b2);border-left:4px solid var(--grn);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;z-index:400;opacity:0;transition:all .25s;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.warn{border-left-color:var(--acc);}
+
+/* SEARCH BAR */
+.search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
+.search-input{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:9px 12px 9px 34px;border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:10px center;}
+.search-input:focus{outline:none;border-color:var(--acc);}
+.search-input::placeholder{color:var(--mu);}
+.pi.hidden{display:none!important;}
+.sg.hidden{display:none!important;}
+
+/* RECIPE PAGE */
+#sRecipes{background:var(--bg);}
+.rec-header{flex-shrink:0;height:52px;background:var(--s1);border-bottom:2px solid var(--b2);padding:0 14px;display:flex;align-items:center;justify-content:space-between;}
+.rec-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--acc);}
+.rec-search-wrap{padding:10px 12px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.rec-body{flex:1;overflow-y:auto;padding:12px;}
+.rec-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.rec-card-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:8px;}
+.rec-card-name{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--tx);}
+.rec-card-tag{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:10px;border:1px solid;text-transform:uppercase;flex-shrink:0;}
+.rec-card-tag.sauces{background:rgba(245,166,35,.12);color:var(--acc);border-color:rgba(245,166,35,.3);}
+.rec-card-tag.proteins{background:rgba(255,107,53,.12);color:var(--hot);border-color:rgba(255,107,53,.3);}
+.rec-card-tag.salads{background:rgba(66,165,245,.12);color:var(--cold);border-color:rgba(66,165,245,.3);}
+.rec-card-tag.other{background:rgba(102,187,106,.12);color:var(--grn);border-color:rgba(102,187,106,.3);}
+.rec-card-body{display:none;padding:0 14px 14px;border-top:1px solid var(--b1);}
+.rec-card-body.open{display:block;}
+.rec-ing{font-size:13px;color:var(--tx2);line-height:2;padding-top:10px;}
+.rec-ing li{list-style:none;padding:2px 0;border-bottom:1px solid var(--b1);}
+.rec-ing li:last-child{border-bottom:none;}
+.rec-ing li::before{content:'• ';color:var(--acc);}
+.rec-actions{display:flex;gap:8px;margin-top:10px;}
+.rec-card.hidden{display:none!important;}
+
+/* REPORT UPGRADES */
+.rep-period-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.rep-ptab{padding:7px 16px;border:1.5px solid var(--b2);background:var(--s2);color:var(--tx2);border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;-webkit-appearance:none;}
+.rep-ptab.active{border-color:var(--acc);color:var(--acc);background:rgba(245,166,35,.1);}
+.rep-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.rep-scard{background:var(--s1);border:1px solid var(--b1);border-radius:9px;padding:10px;text-align:center;}
+.rep-snum{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--acc);line-height:1;}
+.rep-slbl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.rep-item-list{background:var(--s1);border:1px solid var(--b1);border-radius:10px;overflow:hidden;}
+.rep-item{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--b1);}
+.rep-item:last-child{border-bottom:none;}
+.rep-iname{font-size:13px;font-weight:500;color:var(--tx);}
+.rep-ishelf{font-size:10px;color:var(--mu);font-family:'DM Mono',monospace;margin-top:1px;}
+.rep-icount{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx2);text-align:right;white-space:nowrap;}
+.rep-iamt{font-family:'DM Mono',monospace;font-size:12px;color:var(--grn);font-weight:700;text-align:right;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -306,6 +353,13 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     </div>
     <!-- WEEKLY REPORT -->
     <div id="apage-weekly" class="apage">
+      <div style="padding:14px 14px 0;">
+        <div class="rep-period-tabs">
+          <button class="rep-ptab active" id="rpt-weekly" onclick="setRepPeriod('weekly',this)">This Week</button>
+          <button class="rep-ptab" id="rpt-monthly" onclick="setRepPeriod('monthly',this)">This Month</button>
+          <button class="rep-ptab" id="rpt-all" onclick="setRepPeriod('all',this)">All Time</button>
+        </div>
+      </div>
       <div id="weeklyContent" style="padding:0"></div>
     </div>
     <!-- ACTIVITY LOG -->
@@ -395,6 +449,9 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <button class="stab cold"       id="tab-cold" onclick="switchTab('cold')">&#x2744;&#xFE0F; Cold<span class="cnt" id="tc-cold">0/0</span></button>
       <button class="stab cl"         id="tab-cl"   onclick="switchTab('closer')">&#x1F319; Closer<span class="cnt" id="tc-cl">0/0</span></button>
     </div>
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Search prep items..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
+    </div>
   </div>
   <div class="app-body">
     <div class="stats-row">
@@ -430,6 +487,10 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     <button class="umenu-item" id="umAdminBtn" onclick="closeUserMenu();goToAdmin();">
       <span class="mi-ico">⚙︎</span>
       <div><div class="mi-lbl">Admin Panel</div><div class="mi-sub">Roster, reports, weekly history</div></div>
+    </button>
+    <button class="umenu-item" onclick="closeUserMenu();openRecipes();">
+      <span class="mi-ico">📖</span>
+      <div><div class="mi-lbl">Recipes</div><div class="mi-sub">View all prep recipes</div></div>
     </button>
     <button class="umenu-item" onclick="closeUserMenu();openChangePIN();">
       <span class="mi-ico">🔑</span>
@@ -468,6 +529,40 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- RECIPES SCREEN -->
+<div id="sRecipes" class="screen">
+  <div class="rec-header app-fixed">
+    <div class="rec-title">RECIPES</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="recAddBtn" class="btn acc sm" onclick="openAddRecipe()" style="display:none;">+ Add</button>
+      <button class="btn sm" onclick="showScreen('sApp')">← Back</button>
+    </div>
+  </div>
+  <div class="rec-search-wrap app-fixed">
+    <input class="search-input" type="text" placeholder="Search recipes..." oninput="filterRecipes(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
+  </div>
+  <div class="rec-body app-body" id="recipeList"></div>
+</div>
+
+<!-- RECIPE MODAL (admin edit/add) -->
+<div class="mov" id="recModal">
+  <div class="mbox" style="max-width:500px;">
+    <div class="mttl" id="recModalTitle">ADD RECIPE</div>
+    <input id="recName" class="lf" type="text" placeholder="Recipe name" autocorrect="off" style="margin-bottom:8px;">
+    <select id="recCat" class="lf" style="margin-bottom:8px;background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:11px 12px;border-radius:9px;font-size:15px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;width:100%;">
+      <option value="sauces">Sauces / Dressings / Dips</option>
+      <option value="proteins">Proteins</option>
+      <option value="salads">Salads / Vegetables</option>
+      <option value="other">Other</option>
+    </select>
+    <textarea id="recIngredients" class="lf" placeholder="Ingredients (one per line)&#10;e.g. Mayonnaise — 960g&#10;Sriracha — 80g" rows="8" style="resize:vertical;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;"></textarea>
+    <div class="mbtns">
+      <button class="mc" onclick="closeRecModal()">Cancel</button>
+      <button class="mk" onclick="saveRecipe()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // FIREBASE CONFIG
@@ -502,7 +597,7 @@ var COLORS=['#f5a623','#ff6b35','#ef5350','#42a5f5','#b39ddb','#80cbc4','#66bb6a
 // ============================================================
 // STATE — now lives in Firebase, local cache only
 // ============================================================
-var S = { emps:[], items:{}, log:[], history:[] };
+var S = { emps:[], items:{}, log:[], history:[], recipes:[] };
 var cUser=null, cTab='hot', dlPeriod='week';
 var today=new Date();
 var calY=today.getFullYear(), calM=today.getMonth();
@@ -568,6 +663,11 @@ function initFirebase(){
   // Listen to history
   db.ref('history').on('value', function(snap){
     S.history = snap.val() || [];
+  });
+
+  // Listen to recipes
+  db.ref('recipes').on('value', function(snap){
+    S.recipes = snap.val() || [];
   });
 
   // Hide loading, show login
@@ -1093,6 +1193,333 @@ function doChangePIN(){
   closePinModal();showToast('PIN changed successfully!');
 }
 function showToast(msg,warn){clearTimeout(_tt);var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(warn?' warn':'');_tt=setTimeout(function(){t.classList.remove('show');},2800);}
+
+// ============================================================
+// SEARCH - FILTER PREP ITEMS
+// ============================================================
+function filterItems(q){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('.sg').forEach(function(sg){
+    var items=sg.querySelectorAll('.pi');
+    var sgVisible=false;
+    items.forEach(function(pi){
+      var name=pi.querySelector('.pi-name');
+      if(!name)return;
+      var match=!q||name.textContent.toLowerCase().includes(q);
+      pi.classList.toggle('hidden',!match);
+      if(match)sgVisible=true;
+    });
+    sg.classList.toggle('hidden',!sgVisible&&!!q);
+  });
+}
+
+// ============================================================
+// REPORT - PERIOD SELECTOR
+// ============================================================
+var repPeriod='weekly';
+function setRepPeriod(p,btn){
+  repPeriod=p;
+  document.querySelectorAll('.rep-ptab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderWeekly();
+}
+
+// ============================================================
+// WEEKLY/MONTHLY/ALLTIME REPORT
+// ============================================================
+function renderWeekly(){
+  var el=document.getElementById('weeklyContent');if(!el)return;
+  // Build snapshots list
+  var curSnap=buildSnapshot(wkLabel()+' (now)');
+  var all=[curSnap].concat(S.history||[]);
+
+  // For monthly/alltime we aggregate across snapshots
+  if(repPeriod==='monthly'||repPeriod==='all'){
+    renderAggReport(el, all, repPeriod);
+    return;
+  }
+
+  // Weekly — original week tabs view with totals
+  var html='<div style="padding:14px 14px 20px">';
+  html+='<div class="week-tabs">';
+  all.forEach(function(w,i){html+='<button class="wtab'+(i===0?' active':'')+'" onclick="selWk('+i+',this)">'+w.label+'</button>';});
+  html+='</div>';
+  all.forEach(function(w,wi){
+    var rows=collectRows(w);
+    var dayKeys=w.dayKeys||[];
+    html+='<div id="ws'+wi+'" class="wsheet'+(wi===0?' active':'')+'">';
+    if(!rows.length){
+      html+='<div style="background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:24px;text-align:center;"><div style="font-size:32px;margin-bottom:8px">📋</div><div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--mu)">No prep data recorded yet for this week.</div></div>';
+    } else {
+      var totDone=0,totAmt=0,amtList=[];
+      rows.forEach(function(r){
+        Object.keys(r.dv).forEach(function(d){
+          totDone++;
+          if(r.dv[d].amount){totAmt++;amtList.push({item:r.item,amount:r.dv[d].amount,shelf:r.shelf});}
+        });
+      });
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'+
+        '<div class="rep-scard"><div class="rep-snum">'+rows.length+'</div><div class="rep-slbl">Items Prepped</div></div>'+
+        '<div class="rep-scard"><div class="rep-snum" style="color:var(--cold)">'+dayKeys.length+'</div><div class="rep-slbl">Days Active</div></div>'+
+        '<div class="rep-scard"><div class="rep-snum" style="color:var(--grn)">'+totAmt+'</div><div class="rep-slbl">With Amounts</div></div>'+
+        '</div>';
+      // Item totals summary
+      if(amtList.length){
+        html+='<div style="font-family:\'Bebas Neue\',sans-serif;font-size:14px;letter-spacing:2px;color:var(--tx2);margin-bottom:8px">AMOUNT TOTALS</div>';
+        html+='<div class="rep-item-list" style="margin-bottom:14px">';
+        // Group by item
+        var grouped={};
+        rows.forEach(function(r){
+          var key=r.item;
+          if(!grouped[key])grouped[key]={item:r.item,shelf:r.shelf,tab:r.tab,amounts:[],count:0};
+          Object.keys(r.dv).forEach(function(d){
+            grouped[key].count++;
+            if(r.dv[d].amount)grouped[key].amounts.push(r.dv[d].amount);
+          });
+        });
+        Object.values(grouped).filter(function(g){return g.amounts.length>0;}).forEach(function(g){
+          var chipCls={hot:'hot',cold:'cold',closer:'cl'}[g.tab];
+          html+='<div class="rep-item"><div><div class="rep-iname">'+g.item+'</div><div class="rep-ishelf">'+g.shelf+'</div></div>'+
+            '<div class="rep-icount">'+g.count+'x prepped</div>'+
+            '<div class="rep-iamt">'+g.amounts.join(', ')+'</div></div>';
+        });
+        html+='</div>';
+      }
+      // Full table
+      html+='<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="wtable"><thead><tr><th style="min-width:140px">Item</th><th>Station</th>';
+      dayKeys.forEach(function(d){
+        var parts=d.split('-');
+        var dateObj=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+        var label=dateObj.toLocaleDateString('en',{month:'short',day:'numeric'});
+        html+='<th style="min-width:70px">'+label+'</th>';
+      });
+      html+='</tr></thead><tbody>';
+      rows.forEach(function(r){
+        var chipCls={hot:'hot',cold:'cold',closer:'cl'}[r.tab];
+        html+='<tr><td class="iname">'+r.item+'<div style="font-size:9px;color:var(--mu);font-family:\'DM Mono\',monospace;margin-top:1px">'+r.shelf+'</div></td><td><span class="chip '+chipCls+'">'+r.tab+'</span></td>';
+        dayKeys.forEach(function(d){
+          var v=r.dv[d];
+          if(!v){html+='<td class="amt mt">—</td>';return;}
+          var amt=v.amount?('<span style="color:var(--grn);font-weight:700">'+v.amount+'</span>'):'<span style="color:var(--grn)">done</span>';
+          var by=v.by?('<div style="font-size:9px;color:var(--tx2);margin-top:2px">'+v.by+'</div>'):'';
+          html+='<td class="amt" style="color:inherit">'+amt+by+'</td>';
+        });
+        html+='</tr>';
+      });
+      html+='</tbody></table></div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderAggReport(el, allSnaps, period){
+  // Aggregate all snapshots
+  var now=new Date();
+  var cutoff=null;
+  if(period==='monthly'){
+    cutoff=new Date(now.getFullYear(),now.getMonth(),1);
+  }
+  // Collect all day keys across snapshots
+  var itemMap={};
+  allSnaps.forEach(function(snap){
+    (snap.dayKeys||[]).forEach(function(d){
+      if(cutoff){
+        var parts=d.split('-');
+        var dDate=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+        if(dDate<cutoff)return;
+      }
+      Object.keys(snap.days[d]||{}).forEach(function(k){
+        var e=snap.days[d][k];
+        var key=e.item;
+        if(!itemMap[key])itemMap[key]={item:e.item,shelf:e.shelf,tab:e.tab,count:0,amounts:[]};
+        itemMap[key].count++;
+        if(e.amount)itemMap[key].amounts.push(e.amount);
+      });
+    });
+  });
+  // Also include current live items
+  ['hot','cold','closer'].forEach(function(tab){
+    Object.keys(PREP[tab].shelves).forEach(function(shelf){
+      PREP[tab].shelves[shelf].forEach(function(item){
+        // scan all dates in S.items
+        Object.keys(S.items).forEach(function(k){
+          var parts=k.split('|');
+          if(parts.length!==3||parts[0]!==tab||parts[2]!==item)return;
+          var d=parts[1];
+          if(cutoff){
+            var dp=d.split('-');
+            var dDate=new Date(parseInt(dp[0]),parseInt(dp[1])-1,parseInt(dp[2]));
+            if(dDate<cutoff)return;
+          }
+          var v=S.items[k];
+          if(!v||(!v.done&&!v.amount))return;
+          if(!itemMap[item])itemMap[item]={item:item,shelf:shelf,tab:tab,count:0,amounts:[]};
+          itemMap[item].count++;
+          if(v.amount)itemMap[item].amounts.push(v.amount);
+        });
+      });
+    });
+  });
+  var items=Object.values(itemMap).sort(function(a,b){return b.count-a.count;});
+  var periodLabel=period==='monthly'?'THIS MONTH':'ALL TIME';
+  var html='<div style="padding:14px 14px 20px">';
+  html+='<div style="font-family:\'Bebas Neue\',sans-serif;font-size:14px;letter-spacing:2px;color:var(--tx2);margin-bottom:10px">'+periodLabel+' PREP TOTALS</div>';
+  if(!items.length){
+    html+='<div style="background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:24px;text-align:center;font-family:\'DM Mono\',monospace;font-size:12px;color:var(--mu)">No prep data found for this period.</div>';
+  } else {
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+      '<div class="rep-scard"><div class="rep-snum">'+items.length+'</div><div class="rep-slbl">Items Prepped</div></div>'+
+      '<div class="rep-scard"><div class="rep-snum" style="color:var(--grn)">'+items.filter(function(i){return i.amounts.length>0;}).length+'</div><div class="rep-slbl">With Amounts</div></div>'+
+      '</div>';
+    html+='<div class="rep-item-list">';
+    items.forEach(function(g){
+      var chipCls={hot:'hot',cold:'cold',closer:'cl'}[g.tab];
+      html+='<div class="rep-item">'+
+        '<div><div class="rep-iname">'+g.item+'</div><div class="rep-ishelf"><span class="chip '+chipCls+'" style="margin-right:4px">'+g.tab+'</span>'+g.shelf+'</div></div>'+
+        '<div class="rep-icount">'+g.count+'x</div>'+
+        '<div class="rep-iamt">'+(g.amounts.length?g.amounts.slice(-3).join(', '):'—')+'</div>'+
+        '</div>';
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ============================================================
+// RECIPES
+// ============================================================
+var RECIPES_DEFAULT=[
+  {id:'r1',name:'Hollandaise Sauce',cat:'sauces',ingredients:'Egg Yolks — 400g (≈20 yolks)\nButter — 800–1000g (warm, 55–60°C)\nFresh Lemon Juice — 25–30g\nSweet Paprika (optional) — 1–2g\nSalt — 5g (or to taste)'},
+  {id:'r2',name:'French Toast Mix',cat:'other',ingredients:'Eggs — 500g (liquid whole egg)\nMilk (3%) — 300g\nIcing Sugar — 30g\nVanilla — 10g'},
+  {id:'r3',name:'Crème Fraîche',cat:'sauces',ingredients:'Cream cheese — 350g\nSour cream — 150g\nHeavy Cream (cold)\nSalt — ½ tsp'},
+  {id:'r4',name:'Onion Sumac Mix',cat:'salads',ingredients:'Red Onion — 300g\nFresh Parsley — 30g\nSumac — 10g\nLemon Juice — 30g\nOlive Oil — 15g\nSalt — 5g'},
+  {id:'r5',name:'Pickled Chili',cat:'other',ingredients:'Red chili — 250g\nWhite sugar — 110g\nWhite vinegar — 720g\nFine salt — 30g\nBay leaf — 1 pc'},
+  {id:'r6',name:'Cucumber Salad',cat:'salads',ingredients:'Cucumber sliced — 1.5 lbs\nFennel — 1 ea\nDill — 25g\nMint — 25g\nBlack pepper — 5g\nWhite vinegar — 240ml\nApple cider vinegar — 240ml\nWater — 240ml\nSugar — 200g\nJalapeño — 10g\nBay leaf — 1 pc\nSalt — 35g'},
+  {id:'r7',name:'Tuna Teryaki Mix',cat:'proteins',ingredients:'Tuna — 500g (diced or sliced)\nTeriyaki Sauce — 100g\nSesame oil'},
+  {id:'r8',name:'Sumac Onion',cat:'salads',ingredients:'Red onion thin slice — 1kg\nSalt — 5g\nSumac — 10g\nParsley — 50g'},
+  {id:'r9',name:'Blueberry Compote',cat:'sauces',ingredients:'Frozen blueberry — 1kg\nSugar — 500g'},
+  {id:'r10',name:'Tomato Tapenade',cat:'sauces',ingredients:'Sundried Tomatoes — 600g\nOlive Oil — 200g\nGarlic — 3 cloves\nThyme — 10g\nCapers — 10g\nSalt — 4g\nBlack Pepper'},
+  {id:'r11',name:'Bell Pepper Spread',cat:'salads',ingredients:'Roasted Bell Peppers — 800g\nRoasted Almonds — 50g\nBlack Pepper — 1g\nBasil Leaves — 15g\nBalsamic Vinegar — 30g\nGarlic Cloves — 15g\nOlive Oil — as needed\nSalt — 25g'},
+  {id:'r12',name:'Truffle Bechamel',cat:'sauces',ingredients:'Butter — 454g\nFlour — 250g\n35% cream — 1523g\nTruffle mushroom — 18g\nSalt — 10g\nPepper — 3g'},
+  {id:'r13',name:'Tuna Mix',cat:'proteins',ingredients:'Chunk light tuna — 1 can\nMayonnaise — 400ml\nLemon juice — 40ml\nDijon mustard — 30ml\nGreen onion (white part) — 70g'},
+  {id:'r14',name:'Kalamata Tapenade',cat:'sauces',ingredients:'Kalamata olives, pitted — 600g\nVirgin olive oil — 330ml\nGarlic — 30g\nCapers — 140ml\nThyme — 5g'},
+  {id:'r15',name:'Roasted Sweet Potato',cat:'salads',ingredients:'Yam — 1kg\nOlive oil — 150g\nFine salt — 30g\nSage — 0.1 ea\nBrown sugar — 10g'},
+  {id:'r16',name:'Pesto',cat:'sauces',ingredients:'Fresh Basil Leaves — 400g\nGarlic — 3 cloves\nGrated Parmesan — 200g\nPine Nuts — 100g\nOlive Oil — 600g\nSalt — 15g'},
+  {id:'r17',name:'Spicy Mayonnaise',cat:'sauces',ingredients:'Mayonnaise — 960g\nSriracha — 80g\nGarlic oil — 10g\nHoney — 40g'},
+  {id:'r18',name:'Mustard Aioli',cat:'sauces',ingredients:'Dijon grain mustard — 60g\nMayonnaise — 350g'},
+  {id:'r19',name:'Caesar Aioli',cat:'sauces',ingredients:'Mayonnaise — 600g\nHard boiled eggs — 4 pcs\nParmesan — 100g\nCapers — 20g\nSalt — 5g\nPepper — 2g'},
+  {id:'r20',name:'Harissa Aioli',cat:'sauces',ingredients:'Mayonnaise — 2500g\nHarissa — 1000g\nPickled lemon — 250g\nSmoked paprika — 50g\nHoney — 30g\nSalt — 25g'},
+  {id:'r21',name:'Cream Cheese Aioli',cat:'sauces',ingredients:'Cream cheese — 500g\nPickles — 50g\nCapers — 20g\nMint — 30g\nOlive oil — 20g\nSalt — 5g\nPepper — 2g'},
+  {id:'r22',name:'Spicy Ketchup',cat:'sauces',ingredients:'Ketchup — 250g\nSriracha sauce — 80g\nHoney — 16g\nApple cider vinegar — 14g'},
+  {id:'r23',name:'Green Tahini',cat:'sauces',ingredients:'Raw tahini — 400g\nFresh parsley — 80g\nLemon juice (fresh) — 80g\nCold water — 80g\nGarlic — 1 clove\nOlive oil — 40g\nSalt — 6g\nBlack pepper — 1g'},
+  {id:'r24',name:'Schnitzel Egg Mix',cat:'proteins',ingredients:'Liquid whole egg — 800g\nHellmann\'s mayonnaise — 220ml\nDijon grainy mustard — 120g\nKetchup — 120ml\nFine salt — 35g\nPickled cucumber juice — 125g'},
+  {id:'r25',name:'Schnitzel Breadcrumb Mix',cat:'proteins',ingredients:'Panko breadcrumbs — 1.1kg\nSesame seeds — 600g\nFine salt — 120g\nBlack pepper — 10g\nSmoked paprika — 25g\nOregano flakes — 25g\nOnion powder — 55g\nGarlic powder — 55g\nCornflake crumbs — 240g'},
+  {id:'r26',name:'Medi Chicken',cat:'proteins',ingredients:'Chicken — 5kg\nSweet paprika — 40g\nHot paprika — 20g\nBlack pepper — 10g\nCumin — 5g\nMoulin Rouge thyme leaves — 5g\nDried oregano leaves — 5g\nGarlic powder — 10g\nOnion powder — 10g\nCanola oil — 40ml'},
+  {id:'r27',name:'Cajun Chicken Marination',cat:'proteins',ingredients:'Chicken breast — 10kg\n35% cooking cream — 800ml\nOne Step cajun seasoning — 400g\nSalt — 30g\nBlack pepper — 5g\nOlive oil — 50g'}
+];
+
+var recEditId=null;
+
+function openRecipes(){
+  showScreen('sRecipes');
+  // Show add button only for managers
+  var addBtn=document.getElementById('recAddBtn');
+  if(addBtn)addBtn.style.display=(cUser&&cUser.role==='manager')?'block':'none';
+  renderRecipes();
+}
+
+function renderRecipes(){
+  var el=document.getElementById('recipeList');if(!el)return;
+  var recs=S.recipes&&S.recipes.length?S.recipes:RECIPES_DEFAULT;
+  var cats={sauces:'Sauces / Dressings',proteins:'Proteins',salads:'Salads / Vegetables',other:'Other'};
+  var html='';
+  recs.forEach(function(r){
+    var tag=cats[r.cat]||r.cat;
+    var ings=r.ingredients.split('\n').filter(function(l){return l.trim();}).map(function(l){return '<li>'+l.trim()+'</li>';}).join('');
+    var adminBtns=(cUser&&cUser.role==='manager')?
+      '<div class="rec-actions"><button class="btn sm acc" onclick="editRecipe(\''+r.id+'\');event.stopPropagation()">Edit</button><button class="btn sm danger" onclick="deleteRecipe(\''+r.id+'\');event.stopPropagation()">Delete</button></div>':'';
+    html+='<div class="rec-card" id="rc-'+r.id+'">'+
+      '<div class="rec-card-hdr" onclick="toggleRecCard(\''+r.id+'\')">'+
+        '<div class="rec-card-name">'+r.name+'</div>'+
+        '<span class="rec-card-tag '+r.cat+'">'+tag+'</span>'+
+      '</div>'+
+      '<div class="rec-card-body" id="rcb-'+r.id+'">'+
+        '<ul class="rec-ing">'+ings+'</ul>'+
+        adminBtns+
+      '</div>'+
+    '</div>';
+  });
+  el.innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--mu);font-family:\'DM Mono\',monospace;font-size:12px;">No recipes yet.</div>';
+}
+
+function toggleRecCard(id){
+  var body=document.getElementById('rcb-'+id);
+  if(body)body.classList.toggle('open');
+}
+
+function filterRecipes(q){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('.rec-card').forEach(function(card){
+    var name=card.querySelector('.rec-card-name');
+    if(!name)return;
+    var match=!q||name.textContent.toLowerCase().includes(q);
+    card.classList.toggle('hidden',!match);
+  });
+}
+
+function openAddRecipe(){
+  recEditId=null;
+  document.getElementById('recModalTitle').textContent='ADD RECIPE';
+  document.getElementById('recName').value='';
+  document.getElementById('recCat').value='sauces';
+  document.getElementById('recIngredients').value='';
+  document.getElementById('recModal').classList.add('open');
+}
+
+function editRecipe(id){
+  var recs=S.recipes&&S.recipes.length?S.recipes:RECIPES_DEFAULT;
+  var r=recs.find(function(x){return x.id===id;});
+  if(!r)return;
+  recEditId=id;
+  document.getElementById('recModalTitle').textContent='EDIT RECIPE';
+  document.getElementById('recName').value=r.name;
+  document.getElementById('recCat').value=r.cat;
+  document.getElementById('recIngredients').value=r.ingredients;
+  document.getElementById('recModal').classList.add('open');
+}
+
+function saveRecipe(){
+  var name=document.getElementById('recName').value.trim();
+  var cat=document.getElementById('recCat').value;
+  var ingredients=document.getElementById('recIngredients').value.trim();
+  if(!name){showToast('Enter a recipe name',true);return;}
+  if(!ingredients){showToast('Enter ingredients',true);return;}
+  var recs=S.recipes&&S.recipes.length?JSON.parse(JSON.stringify(S.recipes)):JSON.parse(JSON.stringify(RECIPES_DEFAULT));
+  if(recEditId){
+    var idx=recs.findIndex(function(x){return x.id===recEditId;});
+    if(idx>=0)recs[idx]={id:recEditId,name:name,cat:cat,ingredients:ingredients};
+  } else {
+    recs.push({id:'r'+Date.now(),name:name,cat:cat,ingredients:ingredients});
+  }
+  fbSet('recipes',recs);
+  closeRecModal();
+  showToast(recEditId?'Recipe updated!':'Recipe added!');
+}
+
+function deleteRecipe(id){
+  openMod('DELETE RECIPE','Are you sure you want to delete this recipe?',function(){
+    var recs=S.recipes&&S.recipes.length?JSON.parse(JSON.stringify(S.recipes)):JSON.parse(JSON.stringify(RECIPES_DEFAULT));
+    fbSet('recipes',recs.filter(function(r){return r.id!==id;}));
+    showToast('Recipe deleted');
+  });
+}
+
+function closeRecModal(){
+  document.getElementById('recModal').classList.remove('open');
+}
 
 // ============================================================
 // START — connect to Firebase
