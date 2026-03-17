@@ -932,9 +932,30 @@ function renderRoster(){
       '<div class="eav" style="background:'+e.color+'22;color:'+e.color+'">'+e.name.charAt(0)+'</div>'+
       '<div style="flex:1;min-width:0"><div class="enm">'+e.name+'</div><div class="est">'+(sm[e.stn]||e.stn)+' &middot; PIN: '+pinDisplay+'</div></div>'+
       '<span class="ebadge '+(e.role==='manager'?'mgr':e.role==='km'?'km':'cook')+'">'+(roleLabel[e.role]||e.role)+'</span>'+
+      (canEdit?'<button class="btn sm acc" onclick="changeEmpPIN(\''+e.id+'\',\''+e.name+'\')">PIN</button>':'')+
       (canEdit?'<button class="btn sm danger" onclick="removeEmp(\''+e.id+'\')">Remove</button>':'')+
       '</div>';
   }).join('');
+}
+
+function changeEmpPIN(id, name){
+  openMod('CHANGE PIN — '+name.toUpperCase(),
+    '<div style="margin-top:8px">'+
+    '<label style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:6px">New PIN (4 digits)</label>'+
+    '<input id="empNewPin" class="fi" type="tel" maxlength="4" placeholder="1234" inputmode="numeric" style="margin-bottom:0">'+
+    '</div>',
+    function(){
+      var newPin=document.getElementById('empNewPin').value.trim();
+      if(!/^\d{4}$/.test(newPin)){showToast('PIN must be 4 digits',true);return;}
+      var emp=null;for(var i=0;i<S.emps.length;i++){if(S.emps[i].id===id){emp=S.emps[i];break;}}
+      if(!emp)return;
+      emp.pin=newPin;
+      fbSet('emps',S.emps);
+      renderRoster();
+      showToast(name+'\'s PIN updated!');
+    }
+  );
+  setTimeout(function(){var el=document.getElementById('empNewPin');if(el)el.focus();},200);
 }
 function addEmp(){
   var name=document.getElementById('nName').value.trim(),pin=document.getElementById('nPin').value.trim();
