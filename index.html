@@ -684,6 +684,18 @@ function fbSetShared(path,data){ setSyncStatus('syncing'); return db.ref('shared
 function selectLocation(loc){
   cLoc = loc;
   document.getElementById('loginLocLabel').textContent = '📍 ' + LOCATIONS[loc].name;
+  // Load employees for this location immediately so login works
+  S.emps = [];
+  db.ref(cLoc+'/emps').once('value', function(snap){
+    var data = snap.val();
+    if(data && Array.isArray(data) && data.length){
+      S.emps = data;
+    } else {
+      // First time — seed defaults
+      db.ref(cLoc+'/emps').set(DEFAULT_EMPS[cLoc]);
+      S.emps = DEFAULT_EMPS[cLoc].slice();
+    }
+  });
   showScreen('sLogin');
 }
 
