@@ -185,17 +185,17 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .chip.cl{background:rgba(179,157,219,.1);color:var(--cl);border-color:rgba(179,157,219,.2);}
 
 /* CALENDAR */
-.cal-bar{background:var(--s1);border-bottom:1px solid var(--b1);padding:8px 12px;}
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.cal-lbl{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--tx);}
-.cal-nbtn{background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);border-radius:7px;padding:5px 13px;cursor:pointer;font-size:15px;-webkit-appearance:none;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-.cal-dhdr{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;padding:0 0 5px;}
-.cal-day{background:var(--s2);border:1.5px solid var(--b1);border-radius:7px;text-align:center;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--tx2);height:34px;display:flex;align-items:center;justify-content:center;position:relative;}
+.cal-bar{background:var(--s1);border-bottom:1px solid var(--b1);padding:6px 10px;flex-shrink:0;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.cal-lbl{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--tx);}
+.cal-nbtn{background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);border-radius:7px;padding:3px 10px;cursor:pointer;font-size:14px;-webkit-appearance:none;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dhdr{text-align:center;font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;padding:0 0 3px;}
+.cal-day{background:var(--s2);border:1.5px solid var(--b1);border-radius:5px;text-align:center;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--tx2);height:28px;display:flex;align-items:center;justify-content:center;position:relative;}
 .cal-day.active{border-color:var(--acc);color:var(--acc);background:rgba(245,166,35,.1);}
 .cal-day.today{border-color:rgba(102,187,106,.5);color:var(--grn);}
 .cal-day.other{opacity:.3;}
-.cal-day.has-data::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--acc);}
+.cal-day.has-data::after{content:'';position:absolute;bottom:2px;width:3px;height:3px;border-radius:50%;background:var(--acc);}
 
 /* STATION TABS */
 .stabs{display:flex;background:var(--s1);border-bottom:1px solid var(--b1);}
@@ -345,6 +345,13 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
         <div class="loc-addr">Toronto, ON</div>
       </div>
     </button>
+    <button class="loc-btn" onclick="selectLocation('downtown')">
+      <span class="loc-ico">🏙️</span>
+      <div class="loc-info">
+        <div class="loc-name">DOWNTOWN</div>
+        <div class="loc-addr">Toronto, ON</div>
+      </div>
+    </button>
   </div>
 </div>
 
@@ -382,6 +389,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
   <div id="superLocSwitcher" class="loc-switcher" style="display:none;">
     <button class="loc-sw-btn active" id="sw-vaughan" onclick="switchAdminLocation('vaughan',this)">🏪 Vaughan Mills</button>
     <button class="loc-sw-btn" id="sw-eglinton" onclick="switchAdminLocation('eglinton',this)">🏪 Eglinton</button>
+    <button class="loc-sw-btn" id="sw-downtown" onclick="switchAdminLocation('downtown',this)">🏙️ Downtown</button>
   </div>
   <div class="app-body">
     <div id="apage-roster" class="apage active">
@@ -624,7 +632,8 @@ var db = firebase.database();
 // ============================================================
 var LOCATIONS = {
   vaughan: { name: 'Vaughan Mills', short: 'VAUGHAN MILLS' },
-  eglinton: { name: 'Eglinton', short: 'EGLINTON' }
+  eglinton: { name: 'Eglinton', short: 'EGLINTON' },
+  downtown: { name: 'Downtown', short: 'DOWNTOWN' }
 };
 
 // Super Admin — sees all locations
@@ -633,12 +642,16 @@ var SUPER_ADMIN = { name: 'Galatasaray', pin: '1905', role: 'super', color: '#f5
 // Default staff per location
 var DEFAULT_EMPS = {
   vaughan: [
-    { id: 'vm1', name: 'Nick',  pin: '1001', role: 'manager', stn: 'hot',  color: '#f5a623' },
-    { id: 'vm2', name: 'Anna',  pin: '2001', role: 'km',      stn: 'hot',  color: '#42a5f5' }
+    { id: 'vm1', name: 'Nick',    pin: '1001', role: 'manager', stn: 'hot', color: '#f5a623' },
+    { id: 'vm2', name: 'Anna',    pin: '2001', role: 'km',      stn: 'hot', color: '#42a5f5' }
   ],
   eglinton: [
-    { id: 'eg1', name: 'Soheil', pin: '1002', role: 'manager', stn: 'hot', color: '#f5a623' },
-    { id: 'eg2', name: 'Aldwin', pin: '2002', role: 'km',      stn: 'hot', color: '#42a5f5' }
+    { id: 'eg1', name: 'Soheil',  pin: '1002', role: 'manager', stn: 'hot', color: '#f5a623' },
+    { id: 'eg2', name: 'Aldwin',  pin: '2002', role: 'km',      stn: 'hot', color: '#42a5f5' }
+  ],
+  downtown: [
+    { id: 'dt1', name: 'Manager', pin: '1003', role: 'manager', stn: 'hot', color: '#f5a623' },
+    { id: 'dt2', name: 'Tony',    pin: '2003', role: 'km',      stn: 'hot', color: '#42a5f5' }
   ]
 };
 
@@ -912,10 +925,12 @@ function renderRoster(){
   var sm={hot:'Hot Line',cold:'Cold Line',closer:'Closer'};
   var roleLabel={manager:'GM',km:'Kitchen Mgr',cook:'Cook'};
   var canEdit = cUser&&(cUser.role==='super'||cUser.role==='manager');
+  var canSeePin = cUser&&(cUser.role==='super'||cUser.role==='manager'||cUser.role==='km');
   el.innerHTML=S.emps.map(function(e){
+    var pinDisplay = canSeePin ? e.pin : '&bull;'.repeat(e.pin.length);
     return'<div class="emp-row">'+
       '<div class="eav" style="background:'+e.color+'22;color:'+e.color+'">'+e.name.charAt(0)+'</div>'+
-      '<div style="flex:1;min-width:0"><div class="enm">'+e.name+'</div><div class="est">'+(sm[e.stn]||e.stn)+' &middot; PIN: '+'&bull;'.repeat(e.pin.length)+'</div></div>'+
+      '<div style="flex:1;min-width:0"><div class="enm">'+e.name+'</div><div class="est">'+(sm[e.stn]||e.stn)+' &middot; PIN: '+pinDisplay+'</div></div>'+
       '<span class="ebadge '+(e.role==='manager'?'mgr':e.role==='km'?'km':'cook')+'">'+(roleLabel[e.role]||e.role)+'</span>'+
       (canEdit?'<button class="btn sm danger" onclick="removeEmp(\''+e.id+'\')">Remove</button>':'')+
       '</div>';
