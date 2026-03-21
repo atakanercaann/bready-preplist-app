@@ -130,7 +130,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .pin-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--acc);margin-bottom:16px;}
 
 /* SCROLLABLE BODY */
-.app-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;will-change:scroll-position;}
+.app-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
 .app-fixed{flex-shrink:0;}
 
 /* BUTTONS */
@@ -225,17 +225,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .stab.cl.active{border-bottom-color:var(--cl);color:var(--cl);}
 
 /* SEARCH */
-/* HIDE ON SCROLL — GPU accelerated, no layout reflow */
-#appFixedHeader{
-  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease;
-  transform: translateY(0);
-  opacity: 1;
-}
-#appFixedHeader.hidden-header{
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
-}
+
 /* When header is hidden, body expands to fill space */
 #sApp.header-hidden > .app-body{
   margin-top: 0;
@@ -571,7 +561,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       </div>
     </div>
   </div>
-  <div class="app-fixed" id="appFixedHeader">
+  <div class="app-fixed">
     <div class="cal-bar">
       <div class="cal-nav">
         <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
@@ -924,7 +914,6 @@ function openApp(){
   initLocationData();
   showScreen('sApp');
   buildCal();renderAll();renderLog();
-  initScrollBehavior();
 }
 
 // Super admin switches location
@@ -1554,45 +1543,12 @@ loadTheme();
 // ============================================================
 // PERFORMANCE — debounced render to prevent excess redraws
 // ============================================================
-var _renderTimer = null;
 function scheduleRender(){
-  if(_renderTimer) clearTimeout(_renderTimer);
-  // 0ms for same-device actions (instant feel), 200ms for remote Firebase updates
-  _renderTimer = setTimeout(function(){
-    var ae = document.activeElement;
-    if(ae && ae.classList.contains('amt-in')) return;
-    if(document.getElementById('sApp').classList.contains('active')){
-      renderAll(); renderLog(); buildCal();
-    }
-  }, 0);
-}
-// ============================================================
-var _lastScrollY = 0;
-function initScrollBehavior(){
-  var body = document.querySelector('#sApp .app-body');
-  if(!body) return;
-  var hdr = document.getElementById('appFixedHeader');
-  var app = document.getElementById('sApp');
-  var ticking = false; // requestAnimationFrame throttle
-  body.addEventListener('scroll', function(){
-    if(!ticking){
-      requestAnimationFrame(function(){
-        if(!hdr){ ticking=false; return; }
-        var currentY = body.scrollTop;
-        var threshold = hdr.offsetHeight || 160;
-        if(currentY >= threshold){
-          hdr.classList.add('hidden-header');
-          if(app) app.classList.add('header-hidden');
-        } else {
-          hdr.classList.remove('hidden-header');
-          if(app) app.classList.remove('header-hidden');
-        }
-        _lastScrollY = currentY;
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, {passive:true});
+  var ae = document.activeElement;
+  if(ae && ae.classList.contains('amt-in')) return;
+  if(document.getElementById('sApp').classList.contains('active')){
+    renderAll(); renderLog(); buildCal();
+  }
 }
 
 // ============================================================
