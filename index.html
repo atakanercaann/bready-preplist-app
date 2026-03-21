@@ -233,23 +233,29 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 
 .search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
 
-/* ── SCROLL HEADER ANIMATION ──────────────────────
-   Works on mobile, tablet and desktop.
-   ────────────────────────────────────────────── */
-#scrollableHeader{
+/* ── SLIM DATE NAV BAR ─────────────────────────── */
+.date-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px;
+  background:var(--s1);border-bottom:1px solid var(--b1);
   flex-shrink:0;
 }
-#calWrapper{
-  overflow:hidden;
-  /* height set by JS, no transition — only translateY animates */
+.date-nav-btn{
+  background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);
+  border-radius:7px;padding:5px 14px;cursor:pointer;font-size:16px;
+  -webkit-appearance:none;line-height:1;
 }
-#calInner{
-  transform:translateY(0);
-  transition:transform 0.3s ease;
-  will-change:transform;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
+.date-nav-btn:active{background:var(--b1);}
+.date-nav-lbl{
+  font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;
+  color:var(--tx);text-align:center;
 }
+/* Calendar inside activity panel */
+.act-cal-bar{padding:0 0 14px;}
+.act-cal-bar .cal-nav{margin-bottom:5px;}
+
+#scrollableHeader{ flex-shrink:0; }
+#stickyControls{ flex-shrink:0; }
 
 
 
@@ -588,18 +594,12 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       </div>
     </div>
   </div>
-  <div class="app-fixed" id="scrollableHeader">
-    <div id="calWrapper">
-      <div id="calInner">
-        <div class="cal-bar">
-          <div class="cal-nav">
-            <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
-            <div class="cal-lbl" id="calLbl"></div>
-            <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
-          </div>
-          <div class="cal-grid" id="calGrid"></div>
-        </div>
-      </div>
+  <div id="scrollableHeader" class="app-fixed">
+    <!-- Slim date nav -->
+    <div class="date-nav">
+      <button class="date-nav-btn" onclick="prevDay()">&#8592;</button>
+      <div class="date-nav-lbl" id="dateNavLbl"></div>
+      <button class="date-nav-btn" onclick="nextDay()">&#8594;</button>
     </div>
     <div class="stabs">
       <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
@@ -621,6 +621,16 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <div class="panel cold" id="panel-cold"></div>
       <div class="panel closer" id="panel-closer"></div>
       <div class="panel" id="panel-activity" style="padding:14px;">
+        <!-- Full calendar lives here -->
+        <div class="act-cal-bar">
+          <div class="cal-nav">
+            <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
+            <div class="cal-lbl" id="calLbl"></div>
+            <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
+          </div>
+          <div style="margin-bottom:5px;"></div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--acc);margin-bottom:4px;">📋 TODAY'S LOG</div>
         <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;font-family:'DM Mono',monospace;" id="actDateLabel"></div>
         <div id="activityFullLog" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -944,8 +954,7 @@ function openApp(){
   }
   initLocationData();
   showScreen('sApp');
-  buildCal();renderAll();renderLog();
-  initScrollBehavior();
+  buildCal();renderAll();renderLog();updateDateNav();
 }
 
 // Super admin switches location
@@ -1006,7 +1015,20 @@ function buildCal(){
   for(var i=used;i<total;i++){var ny=calM===11?calY+1:calY,nm=calM===11?0:calM+1;var d=dk(ny,nm,next);html+='<div class="cal-day other'+(d===tDK?' today':'')+(d===sDK?' active':'')+(hasData(d)?' has-data':'')+'" onclick="selDate('+ny+','+nm+','+next+')">'+next+'</div>';next++;}
   g.innerHTML=html;
 }
-function selDate(y,m,d){selY=y;selM=m;selD=d;calY=y;calM=m;buildCal();renderAll();renderLog();}
+function updateDateNav(){
+  var d = new Date(selY, selM, selD);
+  var lbl = document.getElementById('dateNavLbl');
+  if(lbl) lbl.textContent = d.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});
+}
+function prevDay(){
+  var d=new Date(selY,selM,selD-1);
+  selDate(d.getFullYear(),d.getMonth(),d.getDate());
+}
+function nextDay(){
+  var d=new Date(selY,selM,selD+1);
+  selDate(d.getFullYear(),d.getMonth(),d.getDate());
+}
+function selDate(y,m,d){selY=y;selM=m;selD=d;calY=y;calM=m;buildCal();renderAll();renderLog();updateDateNav();}
 
 // ============================================================
 // ADMIN
@@ -1588,67 +1610,6 @@ function scheduleRender(){
   if(document.getElementById('sApp').classList.contains('active')){
     renderAll(); renderLog(); buildCal();
   }
-}
-
-// ============================================================
-// SCROLL BEHAVIOR — hide header on down scroll, show at top
-// ============================================================
-function initScrollBehavior(){
-  var body  = document.querySelector('#sApp .app-body');
-  var wrap  = document.getElementById('calWrapper');
-  var inner = document.getElementById('calInner');
-  if(!body || !wrap || !inner) return;
-
-  // Prevent duplicate listeners on re-login
-  if(body._scrollBehaviorInit) return;
-  body._scrollBehaviorInit = true;
-
-  // Measure after paint so height is accurate
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      var calH = inner.offsetHeight;
-      wrap.style.height = calH + 'px';
-
-      var lastY    = 0;
-      var ticking  = false;
-      var isHidden = false;
-      var HIDE_AT  = 30;
-      var SHOW_AT  = 10;
-
-      function hideCalendar(){
-        if(isHidden) return;
-        isHidden = true;
-        inner.style.transform = 'translateY(-100%)';
-        function onHideDone(){
-          inner.removeEventListener('transitionend', onHideDone);
-          if(isHidden) wrap.style.height = '0px';
-        }
-        inner.addEventListener('transitionend', onHideDone);
-      }
-
-      function showCalendar(){
-        if(!isHidden) return;
-        isHidden = false;
-        calH = inner.offsetHeight || calH;
-        wrap.style.height = calH + 'px';
-        requestAnimationFrame(function(){
-          inner.style.transform = 'translateY(0)';
-        });
-      }
-
-      body.addEventListener('scroll', function(){
-        if(ticking) return;
-        ticking = true;
-        requestAnimationFrame(function(){
-          var y = body.scrollTop;
-          if(y <= SHOW_AT && isHidden) showCalendar();
-          else if(y > lastY && y > HIDE_AT && !isHidden) hideCalendar();
-          lastY   = y;
-          ticking = false;
-        });
-      }, {passive:true});
-    });
-  });
 }
 
 // ============================================================
