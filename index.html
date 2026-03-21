@@ -234,8 +234,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
 
 /* ── SCROLL HEADER ANIMATION ──────────────────────
-   Desktop (>768px): always visible, no animation
-   Mobile (<=768px): slides out on scroll, back at top
+   Works on mobile, tablet and desktop.
    ────────────────────────────────────────────── */
 #scrollableHeader{
   flex-shrink:0;
@@ -1600,49 +1599,56 @@ function initScrollBehavior(){
   var inner = document.getElementById('calInner');
   if(!body || !wrap || !inner) return;
 
-  var calH = inner.offsetHeight;
-  wrap.style.height = calH + 'px';
+  // Prevent duplicate listeners on re-login
+  if(body._scrollBehaviorInit) return;
+  body._scrollBehaviorInit = true;
 
-  var lastY    = 0;
-  var ticking  = false;
-  var isHidden = false;
-  var HIDE_AT  = 30;
-  var SHOW_AT  = 10;
-
-  function hideCalendar(){
-    if(isHidden) return;
-    isHidden = true;
-    // Slide up — on finish, snap height to 0 (instant, no jank)
-    inner.style.transform = 'translateY(-100%)';
-    function onHideDone(){
-      inner.removeEventListener('transitionend', onHideDone);
-      if(isHidden) wrap.style.height = '0px';
-    }
-    inner.addEventListener('transitionend', onHideDone);
-  }
-
-  function showCalendar(){
-    if(!isHidden) return;
-    isHidden = false;
-    // Snap height back instantly, then slide in on next frame
-    calH = inner.offsetHeight || calH;
-    wrap.style.height = calH + 'px';
+  // Measure after paint so height is accurate
+  requestAnimationFrame(function(){
     requestAnimationFrame(function(){
-      inner.style.transform = 'translateY(0)';
-    });
-  }
+      var calH = inner.offsetHeight;
+      wrap.style.height = calH + 'px';
 
-  body.addEventListener('scroll', function(){
-    if(ticking) return;
-    ticking = true;
-    requestAnimationFrame(function(){
-      var y = body.scrollTop;
-      if(y <= SHOW_AT && isHidden) showCalendar();
-      else if(y > lastY && y > HIDE_AT && !isHidden) hideCalendar();
-      lastY  = y;
-      ticking = false;
+      var lastY    = 0;
+      var ticking  = false;
+      var isHidden = false;
+      var HIDE_AT  = 30;
+      var SHOW_AT  = 10;
+
+      function hideCalendar(){
+        if(isHidden) return;
+        isHidden = true;
+        inner.style.transform = 'translateY(-100%)';
+        function onHideDone(){
+          inner.removeEventListener('transitionend', onHideDone);
+          if(isHidden) wrap.style.height = '0px';
+        }
+        inner.addEventListener('transitionend', onHideDone);
+      }
+
+      function showCalendar(){
+        if(!isHidden) return;
+        isHidden = false;
+        calH = inner.offsetHeight || calH;
+        wrap.style.height = calH + 'px';
+        requestAnimationFrame(function(){
+          inner.style.transform = 'translateY(0)';
+        });
+      }
+
+      body.addEventListener('scroll', function(){
+        if(ticking) return;
+        ticking = true;
+        requestAnimationFrame(function(){
+          var y = body.scrollTop;
+          if(y <= SHOW_AT && isHidden) showCalendar();
+          else if(y > lastY && y > HIDE_AT && !isHidden) hideCalendar();
+          lastY   = y;
+          ticking = false;
+        });
+      }, {passive:true});
     });
-  }, {passive:true});
+  });
 }
 
 // ============================================================
