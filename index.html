@@ -206,6 +206,10 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .stab.cl.active{border-bottom-color:var(--cl);color:var(--cl);}
 
 /* SEARCH */
+/* HIDE ON SCROLL */
+#appFixedHeader{transition:transform 0.3s ease,opacity 0.3s ease;transform:translateY(0);opacity:1;}
+#appFixedHeader.hidden-header{transform:translateY(-100%);opacity:0;pointer-events:none;}
+
 .search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
 .search-input{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:9px 12px 9px 34px;border-radius:9px;font-size:16px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:10px center;}
 .search-input:focus{outline:none;border-color:var(--acc);}
@@ -248,7 +252,22 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .pfill.cl{background:var(--cl);}
 .ptxt{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);}
 .sg{margin-bottom:16px;}
-.sg-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);letter-spacing:2px;text-transform:uppercase;padding:3px 0 7px;border-bottom:1px solid var(--b1);margin-bottom:5px;}
+.sg-lbl{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:14px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:5px 10px;
+  margin-bottom:8px;
+  border-radius:6px;
+  display:inline-block;
+}
+.sg-lbl.shelf-24{background:rgba(239,83,80,.15);color:#ef5350;border:1px solid rgba(239,83,80,.3);}
+.sg-lbl.shelf-48{background:rgba(245,166,35,.15);color:#f5a623;border:1px solid rgba(245,166,35,.3);}
+.sg-lbl.shelf-72{background:rgba(102,187,106,.15);color:#66bb6a;border:1px solid rgba(102,187,106,.3);}
+.sg-lbl.shelf-96{background:rgba(66,165,245,.15);color:#42a5f5;border:1px solid rgba(66,165,245,.3);}
+.sg-lbl.shelf-120{background:rgba(179,157,219,.15);color:#b39ddb;border:1px solid rgba(179,157,219,.3);}
+.sg-lbl.shelf-other{background:rgba(136,136,136,.12);color:#aaa;border:1px solid rgba(136,136,136,.2);}
 .pi{display:grid;grid-template-columns:30px 1fr 110px 90px;align-items:center;gap:8px;padding:9px 10px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:5px;}
 .pi.done{background:rgba(102,187,106,.08);border-color:rgba(102,187,106,.25);}
 .pi.done .pi-name{text-decoration:line-through;color:var(--mu);}
@@ -495,7 +514,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       </div>
     </div>
   </div>
-  <div class="app-fixed">
+  <div class="app-fixed" id="appFixedHeader">
     <div class="cal-bar">
       <div class="cal-nav">
         <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
@@ -519,7 +538,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <div class="scard"><div class="snum cold" id="sn-cold">0/0</div><div class="slbl">Cold</div></div>
       <div class="scard"><div class="snum cl" id="sn-cl">0/0</div><div class="slbl">Closer</div></div>
     </div>
-    <div class="actlog">
+    <div class="actlog" id="actlogSection">
       <div class="actlog-hdr">TODAY'S ACTIVITY</div>
       <div class="actlog-body" id="logEl"><div class="ale"><span class="ale-m" style="color:var(--mu)">No activity yet.</span></div></div>
     </div>
@@ -548,6 +567,11 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     <button class="umenu-item" onclick="closeUserMenu();openRecipes();"><span class="mi-ico">📖</span><div><div class="mi-lbl">Recipes</div><div class="mi-sub">View all prep recipes</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();openChangePIN();"><span class="mi-ico">🔑</span><div><div class="mi-lbl">Change My PIN</div><div class="mi-sub">Update your 4-digit code</div></div></button>
     <div class="umenu-divider" style="margin:8px 0;"></div>
+    <button class="umenu-item" id="umCostFlowBtn" onclick="closeUserMenu();openCostFlow();" style="display:none;">
+      <span class="mi-ico">◎</span>
+      <div><div class="mi-lbl">CostFlow</div><div class="mi-sub">Recipe costing & food cost control</div></div>
+    </button>
+    <div class="umenu-divider" id="umCostFlowDivider" style="margin:8px 0;display:none;"></div>
     <button class="umenu-item danger" onclick="closeUserMenu();showScreen('sLogin');"><span class="mi-ico">⏻</span><div><div class="mi-lbl">Log Out</div></div></button>
   </div>
 </div>
@@ -650,8 +674,8 @@ var DEFAULT_EMPS = {
     { id: 'eg2', name: 'Aldwin',  pin: '2002', role: 'km',      stn: 'hot', color: '#42a5f5' }
   ],
   downtown: [
-    { id: 'dt1', name: 'Manager', pin: '1003', role: 'manager', stn: 'hot', color: '#f5a623' },
-    { id: 'dt2', name: 'Tony',    pin: '2003', role: 'km',      stn: 'hot', color: '#42a5f5' }
+    { id: 'dt1', name: 'Ran',  pin: '1003', role: 'manager', stn: 'hot', color: '#f5a623' },
+    { id: 'dt2', name: 'Tony', pin: '2003', role: 'km',      stn: 'hot', color: '#42a5f5' }
   ]
 };
 
@@ -750,6 +774,9 @@ function afterLogin(){
   var roleLabel = {super:'Super Admin',manager:'GM',km:'Kitchen Manager',cook:'Cook'}[cUser.role]||cUser.role;
   document.getElementById('hst').textContent = (cUser.role==='super'||cUser.role==='manager') ? roleLabel : roleLabel+' · '+(sm[cUser.stn]||cUser.stn);
   cTab = (cUser.role==='super'||cUser.role==='manager'||cUser.role==='km') ? 'hot' : cUser.stn;
+  // Hide activity log from cooks
+  var actlog = document.getElementById('actlogSection');
+  if(actlog) actlog.style.display = (cUser.role==='cook') ? 'none' : 'block';
   document.getElementById('lname').value='';
   document.getElementById('lpin').value='';
   openApp();
@@ -840,6 +867,7 @@ function openApp(){
   initLocationData();
   showScreen('sApp');
   buildCal();renderAll();renderLog();
+  initScrollBehavior();
 }
 
 // Super admin switches location
@@ -1204,7 +1232,14 @@ function renderPanel(tab){
   var dateStr=new Date(selY,selM,selD).toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});
   html+='<div class="ph"><div class="ptitle '+cls+'">'+tm[tab]+'</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--mu)">'+dateStr+'</span><div class="pbar-wrap"><div class="pbar"><div class="pfill '+cls+'" id="pf-'+tab+'" style="width:0%"></div></div><span class="ptxt" id="pt-'+tab+'">0/0</span></div></div></div>';
   Object.keys(data.shelves).forEach(function(shelf){
-    var items=data.shelves[shelf];html+='<div class="sg"><div class="sg-lbl">'+shelf+'</div>';
+    var items=data.shelves[shelf];
+    var shelfClass='shelf-other';
+    if(shelf.includes('24'))shelfClass='shelf-24';
+    else if(shelf.includes('48'))shelfClass='shelf-48';
+    else if(shelf.includes('72'))shelfClass='shelf-72';
+    else if(shelf.includes('96'))shelfClass='shelf-96';
+    else if(shelf.includes('120'))shelfClass='shelf-120';
+    html+='<div class="sg"><div class="sg-lbl '+shelfClass+'">⏱ '+shelf+'</div>';
     items.forEach(function(item){
       var s=getIt(tab,d,item);total++;if(s.done)done++;
       var esc=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
@@ -1296,6 +1331,11 @@ function openUserMenu(){
   document.getElementById('umRole').textContent=roleLabel+' · '+(LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc);
   var canAdmin=cUser.role==='super'||cUser.role==='manager'||cUser.role==='km';
   document.getElementById('umAdminBtn').style.display=canAdmin?'flex':'none';
+  // CostFlow only for super admin
+  var cfBtn=document.getElementById('umCostFlowBtn');
+  var cfDiv=document.getElementById('umCostFlowDivider');
+  if(cfBtn) cfBtn.style.display=cUser.role==='super'?'flex':'none';
+  if(cfDiv) cfDiv.style.display=cUser.role==='super'?'block':'none';
   ov.classList.add('open');m.classList.add('open');
 }
 function closeUserMenu(){document.getElementById('umenuOverlay').classList.remove('open');document.getElementById('umenu').classList.remove('open');}
@@ -1393,10 +1433,723 @@ function deleteRecipe(id){openMod('DELETE RECIPE','Are you sure you want to dele
 function closeRecModal(){document.getElementById('recModal').classList.remove('open');}
 
 // ============================================================
+// ============================================================
+// SCROLL — hide header on scroll down, show on scroll up
+// ============================================================
+var _lastScrollY = 0;
+function initScrollBehavior(){
+  var body = document.querySelector('#sApp .app-body');
+  if(!body) return;
+  body.addEventListener('scroll', function(){
+    var hdr = document.getElementById('appFixedHeader');
+    if(!hdr) return;
+    var currentY = body.scrollTop;
+    if(currentY > _lastScrollY && currentY > 80){
+      hdr.classList.add('hidden-header');
+    } else {
+      hdr.classList.remove('hidden-header');
+    }
+    _lastScrollY = currentY;
+  });
+}
+
+// ============================================================
 // START
 // ============================================================
 document.getElementById('sLoad').style.display='none';
 showScreen('sLocation');
+</script>
+<!-- ============================================================ -->
+<!-- COSTFLOW SCREEN -->
+<!-- ============================================================ -->
+<div id="sCostFlow" class="screen" style="background:#0c0c0f;font-family:'Instrument Sans',sans-serif;">
+
+<!-- COSTFLOW TOPBAR -->
+<div style="height:52px;flex-shrink:0;background:#111116;border-bottom:1px solid #2a2a3a;display:flex;align-items:center;padding:0 16px;gap:12px;">
+  <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;background:linear-gradient(135deg,#9d91ff,#2dd4a0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0;">CostFlow</div>
+  <div id="cfNav" style="display:flex;gap:4px;flex:1;overflow-x:auto;"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:20px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9d91ff;">DEMO</div>
+    <button onclick="showScreen('sApp')" style="background:#1a1a24;border:1px solid #2a2a3a;color:#8888aa;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'Instrument Sans',sans-serif;">← Back to Bready</button>
+  </div>
+</div>
+
+<!-- COSTFLOW PAGES -->
+<div style="flex:1;overflow:hidden;display:flex;">
+
+  <!-- DASHBOARD -->
+  <div id="cf-dashboard" class="cf-page" style="flex:1;overflow-y:auto;padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f0f0f8;">Good morning, Chef 👋</div><div style="color:#8888aa;font-size:13px;margin-top:2px;">Bready Restaurant Group · 3 locations</div></div>
+    </div>
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;" id="cf-kpis">
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:12px;padding:16px;position:relative;overflow:hidden;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Avg Food Cost %</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#f5c842;">28.4%</div>
+        <div style="font-size:11px;color:#8888aa;margin-top:4px;">↓ 1.2% vs last week</div>
+        <div style="position:absolute;bottom:0;left:0;height:3px;width:28.4%;background:#f5c842;"></div>
+      </div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:12px;padding:16px;position:relative;overflow:hidden;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Weekly Recipe Cost</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#9d91ff;">$4,280</div>
+        <div style="font-size:11px;color:#8888aa;margin-top:4px;">Ingredient spend</div>
+        <div style="position:absolute;bottom:0;left:0;height:3px;width:60%;background:#7c6dfa;"></div>
+      </div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:12px;padding:16px;position:relative;overflow:hidden;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Waste This Week</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#ff5a6e;">$312</div>
+        <div style="font-size:11px;color:#8888aa;margin-top:4px;">↑ $48 vs last week</div>
+        <div style="position:absolute;bottom:0;left:0;height:3px;width:15%;background:#ff5a6e;"></div>
+      </div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:12px;padding:16px;position:relative;overflow:hidden;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Variance Alerts</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#2dd4a0;">3</div>
+        <div style="font-size:11px;color:#8888aa;margin-top:4px;">Items need attention</div>
+        <div style="position:absolute;bottom:0;left:0;height:3px;width:30%;background:#2dd4a0;"></div>
+      </div>
+    </div>
+    <!-- TOP RECIPES -->
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;margin-bottom:16px;">
+      <div style="padding:16px 20px;border-bottom:1px solid #2a2a3a;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f0f0f8;">Top Recipes by Margin</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;white-space:nowrap;">Recipe</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Portion Cost</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Sell Price</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Food Cost %</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">GP</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Status</th>
+          </tr></thead>
+          <tbody id="cf-dash-table"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- ALERTS -->
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;padding:16px;">
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f0f0f8;margin-bottom:12px;">Active Alerts</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:rgba(255,90,110,0.08);margin-bottom:8px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,90,110,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🔴</div>
+        <div><div style="font-size:13px;font-weight:600;color:#f0f0f8;">Chicken breast +18% price spike</div><div style="font-size:11px;color:#8888aa;margin-top:2px;">Sysco · Affects 6 recipes</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:rgba(245,200,66,0.08);margin-bottom:8px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,200,66,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚠️</div>
+        <div><div style="font-size:13px;font-weight:600;color:#f0f0f8;">Salmon — high variance</div><div style="font-size:11px;color:#8888aa;margin-top:2px;">Actual vs theoretical: +$84 this week</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:rgba(124,109,250,0.08);">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,109,250,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📦</div>
+        <div><div style="font-size:13px;font-weight:600;color:#f0f0f8;">Truffle oil — low stock</div><div style="font-size:11px;color:#8888aa;margin-top:2px;">0.3L remaining · Par level: 1L</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INGREDIENTS PAGE -->
+  <div id="cf-ingredients" class="cf-page" style="flex:1;overflow-y:auto;padding:20px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f0f0f8;">Ingredient Database</div><div id="cf-ing-count" style="color:#8888aa;font-size:13px;margin-top:2px;"></div></div>
+      <button onclick="cfOpenIngModal()" style="background:#7c6dfa;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">+ Add Ingredient</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <div style="flex:1;background:#16161d;border:1px solid #2a2a3a;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:10px;">
+        <span style="color:#555570;">⌕</span>
+        <input id="cf-ing-search" type="text" placeholder="Search ingredients..." oninput="cfRenderIngTable()" style="background:none;border:none;outline:none;color:#f0f0f8;font-size:13px;font-family:'Instrument Sans',sans-serif;flex:1;">
+      </div>
+      <select id="cf-ing-cat" onchange="cfRenderIngTable()" style="background:#16161d;border:1px solid #2a2a3a;border-radius:8px;padding:8px 12px;color:#f0f0f8;font-size:13px;font-family:'Instrument Sans',sans-serif;outline:none;">
+        <option value="">All Categories</option>
+        <option>Proteins</option><option>Dairy</option><option>Produce</option><option>Dry Goods</option><option>Sauces</option><option>Other</option>
+      </select>
+    </div>
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr id="cf-ing-thead">
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Ingredient</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Category</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Vendor</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Pack Cost</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Cost/Base Unit</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Yield %</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Allergens</th>
+          </tr></thead>
+          <tbody id="cf-ing-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIPES PAGE -->
+  <div id="cf-recipes" class="cf-page" style="flex:1;overflow-y:auto;padding:20px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f0f0f8;">Recipe Library</div><div id="cf-rec-count" style="color:#8888aa;font-size:13px;margin-top:2px;"></div></div>
+      <button onclick="cfOpenRecipeBuilder()" style="background:#7c6dfa;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">+ Build Recipe</button>
+    </div>
+    <div id="cf-recipe-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+  </div>
+
+  <!-- COSTING PAGE -->
+  <div id="cf-costing" class="cf-page" style="flex:1;overflow-y:auto;padding:20px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f0f0f8;">Recipe Costing</div><div style="color:#8888aa;font-size:13px;margin-top:2px;">Live cost analysis · Adjust target to update suggestions</div></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;color:#8888aa;">Target food cost %:</span>
+        <input id="cf-target-fc" type="number" value="30" oninput="cfRenderCostingTable()" style="background:#16161d;border:1px solid #2a2a3a;border-radius:8px;padding:5px 8px;color:#f0f0f8;font-size:13px;width:60px;text-align:center;outline:none;">
+      </div>
+    </div>
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;white-space:nowrap;">Recipe</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Batch Cost</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Portion Cost</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Sell Price</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Food Cost %</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">GP / Portion</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Suggested Price</th>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Status</th>
+          </tr></thead>
+          <tbody id="cf-costing-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- WASTE PAGE -->
+  <div id="cf-waste" class="cf-page" style="flex:1;overflow-y:auto;padding:20px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f0f0f8;">Waste Log</div><div style="color:#8888aa;font-size:13px;margin-top:2px;">Track and reduce food waste</div></div>
+      <button onclick="cfOpenWasteModal()" style="background:#7c6dfa;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">+ Log Waste</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #ff5a6e;border-radius:12px;padding:14px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Waste This Week</div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5a6e;" id="cf-waste-week">$0</div>
+      </div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #f5c842;border-radius:12px;padding:14px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">This Month</div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#f5c842;">$1,240</div>
+      </div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #9d91ff;border-radius:12px;padding:14px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Top Waste Item</div>
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#9d91ff;padding-top:4px;">Salmon</div>
+      </div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #2dd4a0;border-radius:12px;padding:14px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Waste % of Sales</div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#2dd4a0;">2.1%</div>
+      </div>
+    </div>
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;overflow:hidden;">
+      <div style="padding:14px 18px;border-bottom:1px solid #2a2a3a;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f0f0f8;">Waste Entries</div>
+      <div style="overflow-x:auto;">
+        <div style="display:grid;grid-template-columns:110px 1fr 70px 70px 90px 130px;gap:8px;padding:8px 14px;border-bottom:1px solid #2a2a3a;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Date</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Item</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Qty</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Unit</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Cost</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Reason</span>
+        </div>
+        <div id="cf-waste-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIANCE PAGE -->
+  <div id="cf-variance" class="cf-page" style="flex:1;overflow-y:auto;padding:20px;display:none;">
+    <div style="margin-bottom:20px;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f0f0f8;">Variance Analysis</div><div style="color:#8888aa;font-size:13px;margin-top:2px;">Actual vs theoretical usage — find where money leaks</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #9d91ff;border-radius:12px;padding:14px;"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Theoretical</div><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#9d91ff;">$4,180</div><div style="font-size:11px;color:#8888aa;margin-top:4px;">Recipe × sales</div></div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #f5c842;border-radius:12px;padding:14px;"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Actual</div><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#f5c842;">$4,492</div><div style="font-size:11px;color:#8888aa;margin-top:4px;">Invoices + counts</div></div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #ff5a6e;border-radius:12px;padding:14px;"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Variance $</div><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5a6e;">$312</div><div style="font-size:11px;color:#8888aa;margin-top:4px;">Over theoretical</div></div>
+      <div style="background:#1a1a24;border:1px solid #2a2a3a;border-top:2px solid #ff5a6e;border-radius:12px;padding:14px;"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Variance %</div><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5a6e;">7.5%</div><div style="font-size:11px;color:#8888aa;margin-top:4px;">Target: under 3%</div></div>
+    </div>
+    <div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;overflow:hidden;">
+      <div style="padding:14px 18px;border-bottom:1px solid #2a2a3a;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f0f0f8;">Ingredient Variance Detail</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr>
+            <th style="padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Ingredient</th>
+            <th style="padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Theoretical</th>
+            <th style="padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Actual</th>
+            <th style="padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Variance $</th>
+            <th style="padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Variance %</th>
+            <th style="padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555570;border-bottom:1px solid #2a2a3a;">Alert</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-weight:600;color:#f0f0f8;">Salmon (portion)</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$680</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$764</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#ff5a6e;">+$84</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#ff5a6e;">+12.4%</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;"><span style="background:rgba(255,90,110,0.12);color:#ff5a6e;border:1px solid rgba(255,90,110,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'JetBrains Mono',monospace;">HIGH</span></td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-weight:600;color:#f0f0f8;">Chicken Breast</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$520</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$584</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#ff5a6e;">+$64</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#ff5a6e;">+12.3%</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;"><span style="background:rgba(255,90,110,0.12);color:#ff5a6e;border:1px solid rgba(255,90,110,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'JetBrains Mono',monospace;">HIGH</span></td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-weight:600;color:#f0f0f8;">Truffle Oil</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$180</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$234</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#ff5a6e;">+$54</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#ff5a6e;">+30.0%</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;"><span style="background:rgba(255,90,110,0.12);color:#ff5a6e;border:1px solid rgba(255,90,110,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'JetBrains Mono',monospace;">HIGH</span></td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-weight:600;color:#f0f0f8;">Eggs</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$240</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;">$262</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#f5c842;">+$22</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;font-family:'JetBrains Mono',monospace;color:#f5c842;">+9.2%</td><td style="padding:10px 14px;border-bottom:1px solid #2a2a3a;"><span style="background:rgba(245,200,66,0.12);color:#f5c842;border:1px solid rgba(245,200,66,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'JetBrains Mono',monospace;">MED</span></td></tr>
+            <tr><td style="padding:10px 14px;font-weight:600;color:#f0f0f8;">Cream Cheese</td><td style="padding:10px 14px;font-family:'JetBrains Mono',monospace;">$190</td><td style="padding:10px 14px;font-family:'JetBrains Mono',monospace;">$188</td><td style="padding:10px 14px;font-family:'JetBrains Mono',monospace;color:#2dd4a0;">-$2</td><td style="padding:10px 14px;font-family:'JetBrains Mono',monospace;color:#2dd4a0;">-1.1%</td><td style="padding:10px 14px;"><span style="background:rgba(45,212,160,0.12);color:#2dd4a0;border:1px solid rgba(45,212,160,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:'JetBrains Mono',monospace;">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end pages -->
+</div><!-- end sCostFlow -->
+
+<!-- COSTFLOW INGREDIENT MODAL -->
+<div id="cf-ing-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);">
+  <div style="background:#1a1a24;border:1px solid #333348;border-radius:18px;padding:28px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;">
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0f8;margin-bottom:20px;">Add Ingredient</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Name</label><input id="cf-ing-name" class="cf-fi" type="text" placeholder="e.g. Salmon Fillet"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Category</label><select id="cf-ing-cat2" class="cf-fi"><option>Proteins</option><option>Dairy</option><option>Produce</option><option>Dry Goods</option><option>Sauces</option><option>Other</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Vendor</label><input id="cf-ing-vendor" class="cf-fi" type="text" placeholder="Sysco"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Pack Cost ($)</label><input id="cf-ing-cost" class="cf-fi" type="number" step="0.01" placeholder="0.00"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Pack Size</label><input id="cf-ing-psize" class="cf-fi" type="number" placeholder="1"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Purchase Unit</label><select id="cf-ing-punit" class="cf-fi"><option>kg</option><option>lb</option><option>case</option><option>bag</option><option>bottle</option><option>each</option><option>L</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Base Unit</label><select id="cf-ing-bunit" class="cf-fi"><option>g</option><option>kg</option><option>ml</option><option>L</option><option>each</option><option>oz</option><option>lb</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Yield %</label><input id="cf-ing-yield" class="cf-fi" type="number" value="100"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:20px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Allergens</label><input id="cf-ing-allergens" class="cf-fi" type="text" placeholder="e.g. Fish, Gluten"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+      <button onclick="document.getElementById('cf-ing-modal').style.display='none'" style="background:#1f1f2e;border:1px solid #333348;color:#8888aa;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Cancel</button>
+      <button onclick="cfSaveIngredient()" style="background:#7c6dfa;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Save Ingredient</button>
+    </div>
+  </div>
+</div>
+
+<!-- COSTFLOW RECIPE BUILDER MODAL -->
+<div id="cf-rec-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);">
+  <div style="background:#1a1a24;border:1px solid #333348;border-radius:18px;padding:28px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;">
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0f8;margin-bottom:20px;">Recipe Builder</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Recipe Name</label><input id="cf-rec-name" class="cf-fi" type="text" placeholder="e.g. Smoked Salmon Benny"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Category</label><select id="cf-rec-cat" class="cf-fi"><option>Brunch</option><option>Lunch</option><option>Dinner</option><option>Snacks</option><option>Dessert</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Portions per Batch</label><input id="cf-rec-portions" class="cf-fi" type="number" value="1" min="1" oninput="cfUpdateRecipeCost()"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Selling Price ($)</label><input id="cf-rec-price" class="cf-fi" type="number" step="0.01" placeholder="0.00" oninput="cfUpdateRecipeCost()"></div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#8888aa;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Ingredients</div>
+    <div id="cf-rec-ing-list"></div>
+    <button onclick="cfAddIngRow()" style="background:#1f1f2e;border:1px solid #333348;color:#8888aa;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;margin-top:8px;font-family:'Instrument Sans',sans-serif;">+ Add Ingredient</button>
+    <!-- Live cost panel -->
+    <div style="background:#0c0c0f;border:1px solid #333348;border-radius:12px;padding:16px;margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Batch Cost</div><div id="cf-rc-batch" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#9d91ff;">$0.00</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Portion Cost</div><div id="cf-rc-portion" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#9d91ff;">$0.00</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Food Cost %</div><div id="cf-rc-fc" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#8888aa;">—</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Suggested Price</div><div id="cf-rc-suggest" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#2dd4a0;">—</div></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button onclick="document.getElementById('cf-rec-modal').style.display='none'" style="background:#1f1f2e;border:1px solid #333348;color:#8888aa;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Cancel</button>
+      <button onclick="cfSaveRecipe()" style="background:#7c6dfa;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Save Recipe</button>
+    </div>
+  </div>
+</div>
+
+<!-- COSTFLOW WASTE MODAL -->
+<div id="cf-waste-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);">
+  <div style="background:#1a1a24;border:1px solid #333348;border-radius:18px;padding:28px;width:100%;max-width:460px;">
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0f8;margin-bottom:20px;">Log Waste</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Date</label><input id="cf-waste-date" class="cf-fi" type="date"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Ingredient</label><select id="cf-waste-ing" class="cf-fi"><option>-- Select --</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Qty</label><input id="cf-waste-qty" class="cf-fi" type="number" step="0.01" placeholder="0"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Unit</label><select id="cf-waste-unit" class="cf-fi"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>each</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Cost ($)</label><input id="cf-waste-cost" class="cf-fi" type="number" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:20px;"><label style="font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;">Reason</label><select id="cf-waste-reason" class="cf-fi"><option>Expired / Spoiled</option><option>Over-portioning</option><option>Prep waste / Trim</option><option>Dropped / Spilled</option><option>Family meal</option><option>Other</option></select></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+      <button onclick="document.getElementById('cf-waste-modal').style.display='none'" style="background:#1f1f2e;border:1px solid #333348;color:#8888aa;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Cancel</button>
+      <button onclick="cfSaveWaste()" style="background:#7c6dfa;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Log Waste</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* CostFlow fonts */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap');
+#sCostFlow { font-family: 'Instrument Sans', sans-serif; }
+#sCostFlow ::-webkit-scrollbar { width: 4px; height: 4px; }
+#sCostFlow ::-webkit-scrollbar-track { background: transparent; }
+#sCostFlow ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
+.cf-fi { background: #16161d; border: 1px solid #2a2a3a; border-radius: 8px; padding: 9px 12px; font-size: 13px; color: #f0f0f8; font-family: 'Instrument Sans', sans-serif; outline: none; width: 100%; transition: border-color 0.15s; }
+.cf-fi:focus { border-color: #7c6dfa; }
+.cf-fi::placeholder { color: #555570; }
+.cf-nav-btn { padding: 6px 14px; border-radius: 8px; border: none; background: none; color: #8888aa; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'Instrument Sans', sans-serif; transition: all 0.15s; }
+.cf-nav-btn:hover { background: #1a1a24; color: #f0f0f8; }
+.cf-nav-btn.active { background: #1f1f2e; color: #9d91ff; }
+</style>
+
+<script>
+// ============================================================
+// COSTFLOW — OPEN & NAV
+// ============================================================
+function openCostFlow(){
+  showScreen('sCostFlow');
+  buildCfNav();
+  cfInitAll();
+}
+
+function buildCfNav(){
+  var nav = document.getElementById('cfNav');
+  var pages = [
+    {id:'dashboard',label:'⬡ Dashboard'},
+    {id:'ingredients',label:'⊞ Ingredients'},
+    {id:'recipes',label:'◈ Recipes'},
+    {id:'costing',label:'◎ Costing'},
+    {id:'waste',label:'◌ Waste Log'},
+    {id:'variance',label:'△ Variance'},
+  ];
+  nav.innerHTML = pages.map(function(p){
+    return '<button class="cf-nav-btn'+(p.id==='dashboard'?' active':'')+'" onclick="cfShowPage(\''+p.id+'\',this)">'+p.label+'</button>';
+  }).join('');
+}
+
+function cfShowPage(id, btn){
+  document.querySelectorAll('.cf-page').forEach(function(p){ p.style.display='none'; });
+  document.querySelectorAll('.cf-nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('cf-'+id).style.display='block';
+  if(btn) btn.classList.add('active');
+  if(id==='costing') cfRenderCostingTable();
+  if(id==='waste') cfRenderWasteLog();
+}
+
+// ============================================================
+// COSTFLOW — DATA
+// ============================================================
+var CF_INGREDIENTS = [
+  {id:'ci1',name:'Salmon Fillet',cat:'Proteins',vendor:'Sysco',punit:'kg',psize:5,cost:55.00,bunit:'g',yield:88,allergens:'Fish'},
+  {id:'ci2',name:'Chicken Breast',cat:'Proteins',vendor:'Sysco',punit:'kg',psize:5,cost:28.00,bunit:'g',yield:95,allergens:''},
+  {id:'ci3',name:'Whole Eggs',cat:'Dairy',vendor:'Local Farm',punit:'case',psize:30,cost:12.00,bunit:'each',yield:100,allergens:'Eggs'},
+  {id:'ci4',name:'Cream Cheese',cat:'Dairy',vendor:'Saputo',punit:'kg',psize:2,cost:18.00,bunit:'g',yield:100,allergens:'Dairy'},
+  {id:'ci5',name:'Hollandaise Mix',cat:'Sauces',vendor:'Sysco',punit:'bag',psize:1000,cost:8.50,bunit:'g',yield:100,allergens:'Eggs,Dairy'},
+  {id:'ci6',name:'Truffle Oil',cat:'Sauces',vendor:'Gourmet Foods',punit:'bottle',psize:500,cost:22.00,bunit:'ml',yield:100,allergens:''},
+  {id:'ci7',name:'English Muffin',cat:'Dry Goods',vendor:'Sysco',punit:'case',psize:48,cost:14.00,bunit:'each',yield:100,allergens:'Gluten'},
+  {id:'ci8',name:'Smoked Salmon',cat:'Proteins',vendor:'Atlantic Foods',punit:'kg',psize:1000,cost:38.00,bunit:'g',yield:100,allergens:'Fish'},
+  {id:'ci9',name:'Capers',cat:'Other',vendor:'Sysco',punit:'jar',psize:500,cost:6.50,bunit:'g',yield:100,allergens:''},
+  {id:'ci10',name:'Pesto',cat:'Sauces',vendor:'House Made',punit:'batch',psize:1000,cost:12.00,bunit:'g',yield:100,allergens:'Nuts,Dairy'},
+  {id:'ci11',name:'Mayonnaise',cat:'Sauces',vendor:'Sysco',punit:'kg',psize:4000,cost:14.00,bunit:'g',yield:100,allergens:'Eggs'},
+];
+
+var CF_RECIPES = [
+  {id:'cr1',name:'Smoked Salmon Eggs Benny',cat:'Brunch',portions:1,price:22.00,ingredients:[{id:'ci7',qty:2,unit:'each'},{id:'ci8',qty:80,unit:'g'},{id:'ci3',qty:2,unit:'each'},{id:'ci5',qty:60,unit:'g'},{id:'ci6',qty:5,unit:'ml'}]},
+  {id:'cr2',name:'Cajun Chicken Bowl',cat:'Lunch',portions:1,price:19.00,ingredients:[{id:'ci2',qty:180,unit:'g'},{id:'ci10',qty:30,unit:'g'},{id:'ci11',qty:40,unit:'g'}]},
+  {id:'cr3',name:'Medi Chicken Wrap',cat:'Lunch',portions:1,price:16.00,ingredients:[{id:'ci2',qty:160,unit:'g'},{id:'ci11',qty:30,unit:'g'}]},
+  {id:'cr4',name:'Tuna Poke Bowl',cat:'Lunch',portions:1,price:21.00,ingredients:[{id:'ci1',qty:120,unit:'g'},{id:'ci9',qty:15,unit:'g'},{id:'ci6',qty:8,unit:'ml'}]},
+  {id:'cr5',name:'Truffle Schnitzel',cat:'Dinner',portions:1,price:28.00,ingredients:[{id:'ci2',qty:220,unit:'g'},{id:'ci6',qty:15,unit:'ml'},{id:'ci5',qty:40,unit:'g'}]},
+];
+
+var CF_WASTE = [
+  {date:'2026-03-18',item:'Salmon Fillet',qty:0.8,unit:'kg',cost:44.00,reason:'Expired / Spoiled'},
+  {date:'2026-03-18',item:'Chicken Breast',qty:0.5,unit:'kg',cost:14.00,reason:'Over-portioning'},
+  {date:'2026-03-17',item:'Truffle Oil',qty:0.1,unit:'L',cost:22.00,reason:'Dropped / Spilled'},
+  {date:'2026-03-17',item:'Whole Eggs',qty:6,unit:'each',cost:2.40,reason:'Breakage'},
+  {date:'2026-03-16',item:'Smoked Salmon',qty:0.3,unit:'kg',cost:11.40,reason:'Expired / Spoiled'},
+];
+
+var CF_REC_INGS = [];
+var CF_TARGET_FC = 30;
+
+// ============================================================
+// COSTFLOW INIT
+// ============================================================
+function cfInitAll(){
+  cfRenderIngTable();
+  cfRenderRecipeCards();
+  cfRenderCostingTable();
+  cfRenderWasteLog();
+  cfRenderDashTable();
+  document.getElementById('cf-ing-count').textContent = CF_INGREDIENTS.length + ' ingredients in database';
+  document.getElementById('cf-rec-count').textContent = CF_RECIPES.length + ' recipes';
+  cfUpdateWasteWeekTotal();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function cfCostPerBase(ing){
+  return (ing.cost / ing.psize) / (ing.yield / 100);
+}
+function cfCalcIngCost(ingId, qty){
+  var ing = CF_INGREDIENTS.find(function(i){ return i.id === ingId; });
+  if(!ing) return 0;
+  return cfCostPerBase(ing) * qty;
+}
+function cfCalcRecipeCost(rec){
+  var total = 0;
+  rec.ingredients.forEach(function(ri){ total += cfCalcIngCost(ri.id, ri.qty); });
+  return total;
+}
+function cfFmt(n){ return '$'+n.toFixed(2); }
+function cfFmtPct(n){ return n.toFixed(1)+'%'; }
+
+// ============================================================
+// DASHBOARD TABLE
+// ============================================================
+function cfRenderDashTable(){
+  var html = CF_RECIPES.map(function(r){
+    var cost = cfCalcRecipeCost(r);
+    var pc = cost / r.portions;
+    var fc = r.price > 0 ? (pc/r.price*100) : 0;
+    var gp = r.price - pc;
+    var fcColor = fc < 28 ? '#2dd4a0' : fc < 33 ? '#f5c842' : '#ff5a6e';
+    var status = fc < 28 ? '<span style="background:rgba(45,212,160,0.12);color:#2dd4a0;border:1px solid rgba(45,212,160,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">Star</span>' :
+                 fc < 33 ? '<span style="background:rgba(245,200,66,0.12);color:#f5c842;border:1px solid rgba(245,200,66,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">Review</span>' :
+                 '<span style="background:rgba(255,90,110,0.12);color:#ff5a6e;border:1px solid rgba(255,90,110,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">High Cost</span>';
+    return '<tr style="border-bottom:1px solid #2a2a3a;">'+
+      '<td style="padding:10px 14px;font-weight:600;color:#f0f0f8;">'+r.name+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;">'+cfFmt(pc)+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;">'+(r.price>0?cfFmt(r.price):'—')+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:'+fcColor+';">'+(r.price>0?cfFmtPct(fc):'—')+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#2dd4a0;">'+(r.price>0?cfFmt(gp):'—')+'</td>'+
+      '<td style="padding:10px 14px;">'+status+'</td>'+
+    '</tr>';
+  }).join('');
+  document.getElementById('cf-dash-table').innerHTML = html;
+}
+
+// ============================================================
+// INGREDIENTS
+// ============================================================
+function cfRenderIngTable(){
+  var q = (document.getElementById('cf-ing-search').value||'').toLowerCase();
+  var cat = document.getElementById('cf-ing-cat').value;
+  var filtered = CF_INGREDIENTS.filter(function(i){
+    return (!q || i.name.toLowerCase().includes(q) || i.vendor.toLowerCase().includes(q)) && (!cat || i.cat === cat);
+  });
+  var catColors = {Proteins:'#ff5a6e',Dairy:'#9d91ff',Produce:'#2dd4a0','Dry Goods':'#f5c842',Sauces:'#42a5f5',Other:'#8888aa'};
+  var html = filtered.map(function(i){
+    var cpu = cfCostPerBase(i);
+    var col = catColors[i.cat]||'#8888aa';
+    return '<tr style="border-bottom:1px solid #2a2a3a;">'+
+      '<td style="padding:10px 14px;font-weight:600;color:#f0f0f8;">'+i.name+'</td>'+
+      '<td style="padding:10px 14px;"><span style="background:'+col+'20;color:'+col+';border:1px solid '+col+'40;padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">'+i.cat+'</span></td>'+
+      '<td style="padding:10px 14px;font-size:12px;color:#8888aa;">'+i.vendor+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;">'+cfFmt(i.cost)+'/'+i.punit+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#2dd4a0;">'+cfFmt(cpu)+'/'+i.bunit+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:'+(i.yield<90?'#f5c842':'#8888aa')+';">'+i.yield+'%</td>'+
+      '<td style="padding:10px 14px;font-size:11px;color:#8888aa;">'+(i.allergens||'—')+'</td>'+
+    '</tr>';
+  }).join('');
+  document.getElementById('cf-ing-tbody').innerHTML = html || '<tr><td colspan="7" style="padding:32px;text-align:center;color:#555570;">No ingredients found</td></tr>';
+  document.getElementById('cf-ing-count').textContent = CF_INGREDIENTS.length + ' ingredients · '+filtered.length+' shown';
+}
+
+function cfOpenIngModal(){
+  ['cf-ing-name','cf-ing-vendor','cf-ing-cost','cf-ing-psize','cf-ing-allergens'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('cf-ing-yield').value='100';
+  document.getElementById('cf-ing-modal').style.display='flex';
+}
+
+function cfSaveIngredient(){
+  var name = document.getElementById('cf-ing-name').value.trim();
+  if(!name){ showToast('Enter ingredient name',true); return; }
+  CF_INGREDIENTS.push({
+    id:'ci'+Date.now(), name:name,
+    cat:document.getElementById('cf-ing-cat2').value,
+    vendor:document.getElementById('cf-ing-vendor').value||'Unknown',
+    punit:document.getElementById('cf-ing-punit').value,
+    psize:parseFloat(document.getElementById('cf-ing-psize').value)||1,
+    cost:parseFloat(document.getElementById('cf-ing-cost').value)||0,
+    bunit:document.getElementById('cf-ing-bunit').value,
+    yield:parseFloat(document.getElementById('cf-ing-yield').value)||100,
+    allergens:document.getElementById('cf-ing-allergens').value
+  });
+  document.getElementById('cf-ing-modal').style.display='none';
+  cfRenderIngTable();
+  showToast(name+' added to database!');
+}
+
+// ============================================================
+// RECIPES
+// ============================================================
+function cfRenderRecipeCards(q){
+  q=(q||'').toLowerCase();
+  var filtered=CF_RECIPES.filter(function(r){return !q||r.name.toLowerCase().includes(q);});
+  var catColors={Brunch:'#9d91ff',Lunch:'#2dd4a0',Dinner:'#f5c842',Snacks:'#ff5a6e',Dessert:'#42a5f5'};
+  var html=filtered.map(function(r){
+    var cost=cfCalcRecipeCost(r);
+    var pc=cost/r.portions;
+    var fc=r.price>0?(pc/r.price*100):0;
+    var fcColor=fc<28?'#2dd4a0':fc<33?'#f5c842':'#ff5a6e';
+    var gp=r.price-pc;
+    var col=catColors[r.cat]||'#8888aa';
+    return '<div style="background:#1a1a24;border:1px solid #2a2a3a;border-radius:14px;padding:16px;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor=\'#7c6dfa\'" onmouseout="this.style.borderColor=\'#2a2a3a\'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:700;color:#f0f0f8;">'+r.name+'</div>'+
+        '<span style="background:'+col+'20;color:'+col+';border:1px solid '+col+'40;padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;flex-shrink:0;margin-left:8px;">'+r.cat+'</span>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">'+
+        '<div style="background:#16161d;border-radius:8px;padding:8px 10px;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">Cost</div><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700;color:#9d91ff;margin-top:2px;">'+cfFmt(pc)+'</div></div>'+
+        '<div style="background:#16161d;border-radius:8px;padding:8px 10px;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">FC%</div><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700;color:'+fcColor+';margin-top:2px;">'+(r.price>0?cfFmtPct(fc):'—')+'</div></div>'+
+        '<div style="background:#16161d;border-radius:8px;padding:8px 10px;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#555570;text-transform:uppercase;letter-spacing:1px;">GP</div><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700;color:#2dd4a0;margin-top:2px;">'+(r.price>0?cfFmt(gp):'—')+'</div></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('cf-recipe-grid').innerHTML = html || '<div style="text-align:center;padding:48px;color:#555570;"><div style="font-size:40px;margin-bottom:10px;">◈</div><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700;color:#8888aa;">No recipes yet</div></div>';
+  document.getElementById('cf-rec-count').textContent = CF_RECIPES.length+' recipes · '+r.ingredients.length+' ingredients each on average';
+  document.getElementById('cf-rec-count').textContent = CF_RECIPES.length+' recipes';
+}
+
+// ============================================================
+// RECIPE BUILDER
+// ============================================================
+function cfOpenRecipeBuilder(){
+  CF_REC_INGS=[];
+  document.getElementById('cf-rec-name').value='';
+  document.getElementById('cf-rec-price').value='';
+  document.getElementById('cf-rec-portions').value='1';
+  cfRenderRecIngList();
+  cfUpdateRecipeCost();
+  document.getElementById('cf-rec-modal').style.display='flex';
+}
+
+function cfAddIngRow(){ CF_REC_INGS.push({id:'',qty:0,unit:'g'}); cfRenderRecIngList(); }
+
+function cfRenderRecIngList(){
+  var opts=CF_INGREDIENTS.map(function(i){return '<option value="'+i.id+'">'+i.name+'</option>';}).join('');
+  var html=CF_REC_INGS.map(function(ri,idx){
+    var cost=ri.id?cfCalcIngCost(ri.id,ri.qty||0):0;
+    return '<div style="display:grid;grid-template-columns:1fr 70px 90px 70px 30px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #2a2a3a;">'+
+      '<select class="cf-fi" style="font-size:12px;padding:5px 8px;" onchange="cfUpdateRecIng('+idx+',\'id\',this.value)"><option value="">-- Select --</option>'+opts+'</select>'+
+      '<input class="cf-fi" type="number" value="'+ri.qty+'" style="font-size:12px;padding:5px 8px;text-align:center;" oninput="cfUpdateRecIng('+idx+',\'qty\',parseFloat(this.value)||0)">'+
+      '<select class="cf-fi" style="font-size:12px;padding:5px 8px;" onchange="cfUpdateRecIng('+idx+',\'unit\',this.value)"><option>g</option><option>kg</option><option>ml</option><option>L</option><option>each</option></select>'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#2dd4a0;">'+cfFmt(cost)+'</span>'+
+      '<button onclick="cfRemoveRecIng('+idx+')" style="background:none;border:none;color:#555570;cursor:pointer;font-size:16px;padding:4px;border-radius:4px;" onmouseover="this.style.color=\'#ff5a6e\'" onmouseout="this.style.color=\'#555570\'">×</button>'+
+    '</div>';
+  }).join('');
+  document.getElementById('cf-rec-ing-list').innerHTML = html || '<div style="text-align:center;padding:16px;color:#555570;font-size:12px;">No ingredients added yet</div>';
+  // Restore select values
+  var selects=document.querySelectorAll('#cf-rec-ing-list select');
+  CF_REC_INGS.forEach(function(ri,idx){
+    if(ri.id&&selects[idx*2])selects[idx*2].value=ri.id;
+    if(selects[idx*2+1])selects[idx*2+1].value=ri.unit;
+  });
+}
+
+function cfUpdateRecIng(idx,key,val){ CF_REC_INGS[idx][key]=val; cfRenderRecIngList(); cfUpdateRecipeCost(); }
+function cfRemoveRecIng(idx){ CF_REC_INGS.splice(idx,1); cfRenderRecIngList(); cfUpdateRecipeCost(); }
+
+function cfUpdateRecipeCost(){
+  var total=0;
+  CF_REC_INGS.forEach(function(ri){ if(ri.id)total+=cfCalcIngCost(ri.id,ri.qty||0); });
+  var portions=parseInt(document.getElementById('cf-rec-portions').value)||1;
+  var price=parseFloat(document.getElementById('cf-rec-price').value)||0;
+  var pc=total/portions;
+  var fc=price>0?(pc/price*100):0;
+  var suggested=pc/(CF_TARGET_FC/100);
+  var fcColor=fc<28?'#2dd4a0':fc<33?'#f5c842':'#ff5a6e';
+  document.getElementById('cf-rc-batch').textContent=cfFmt(total);
+  document.getElementById('cf-rc-portion').textContent=cfFmt(pc);
+  document.getElementById('cf-rc-fc').textContent=price>0?cfFmtPct(fc):'—';
+  document.getElementById('cf-rc-fc').style.color=price>0?fcColor:'#8888aa';
+  document.getElementById('cf-rc-suggest').textContent=cfFmt(suggested);
+}
+
+function cfSaveRecipe(){
+  var name=document.getElementById('cf-rec-name').value.trim();
+  if(!name){showToast('Enter a recipe name',true);return;}
+  var valid=CF_REC_INGS.filter(function(ri){return ri.id;});
+  if(!valid.length){showToast('Add at least one ingredient',true);return;}
+  CF_RECIPES.push({
+    id:'cr'+Date.now(), name:name,
+    cat:document.getElementById('cf-rec-cat').value,
+    portions:parseInt(document.getElementById('cf-rec-portions').value)||1,
+    price:parseFloat(document.getElementById('cf-rec-price').value)||0,
+    ingredients:valid
+  });
+  document.getElementById('cf-rec-modal').style.display='none';
+  cfRenderRecipeCards();
+  cfRenderCostingTable();
+  cfRenderDashTable();
+  showToast(name+' recipe saved!');
+}
+
+// ============================================================
+// COSTING TABLE
+// ============================================================
+function cfRenderCostingTable(){
+  var target=parseFloat(document.getElementById('cf-target-fc').value)||30;
+  CF_TARGET_FC=target;
+  var html=CF_RECIPES.map(function(r){
+    var cost=cfCalcRecipeCost(r);
+    var pc=cost/r.portions;
+    var fc=r.price>0?(pc/r.price*100):0;
+    var gp=r.price-pc;
+    var suggested=pc/(target/100);
+    var fcColor=fc<target-2?'#2dd4a0':fc<target+3?'#f5c842':'#ff5a6e';
+    var status=fc<target-2?'<span style="background:rgba(45,212,160,0.12);color:#2dd4a0;border:1px solid rgba(45,212,160,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">On Target</span>':
+               fc<target+3?'<span style="background:rgba(245,200,66,0.12);color:#f5c842;border:1px solid rgba(245,200,66,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">Review</span>':
+               '<span style="background:rgba(255,90,110,0.12);color:#ff5a6e;border:1px solid rgba(255,90,110,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-family:\'JetBrains Mono\',monospace;">High Cost</span>';
+    return '<tr style="border-bottom:1px solid #2a2a3a;">'+
+      '<td style="padding:10px 14px;font-weight:600;color:#f0f0f8;white-space:nowrap;">'+r.name+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;">'+cfFmt(cost)+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;">'+cfFmt(pc)+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;">'+(r.price>0?cfFmt(r.price):'—')+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:'+fcColor+';">'+(r.price>0?cfFmtPct(fc):'—')+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#2dd4a0;">'+(r.price>0?cfFmt(gp):'—')+'</td>'+
+      '<td style="padding:10px 14px;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#9d91ff;">'+cfFmt(suggested)+'</td>'+
+      '<td style="padding:10px 14px;">'+status+'</td>'+
+    '</tr>';
+  }).join('');
+  document.getElementById('cf-costing-tbody').innerHTML=html;
+}
+
+// ============================================================
+// WASTE LOG
+// ============================================================
+function cfUpdateWasteWeekTotal(){
+  var total=CF_WASTE.reduce(function(s,w){return s+w.cost;},0);
+  document.getElementById('cf-waste-week').textContent=cfFmt(total);
+}
+
+function cfRenderWasteLog(){
+  var html=CF_WASTE.map(function(w){
+    var rc=w.reason.includes('Expired')?'#ff5a6e':w.reason.includes('Over')?'#f5c842':'#8888aa';
+    return '<div style="display:grid;grid-template-columns:110px 1fr 70px 70px 90px 130px;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid #2a2a3a;font-size:13px;">'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#8888aa;">'+w.date+'</span>'+
+      '<span style="font-weight:500;color:#f0f0f8;">'+w.item+'</span>'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#f0f0f8;">'+w.qty+'</span>'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#8888aa;">'+w.unit+'</span>'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#ff5a6e;">'+cfFmt(w.cost)+'</span>'+
+      '<span style="font-size:11px;color:'+rc+';">'+w.reason+'</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('cf-waste-list').innerHTML=html;
+}
+
+function cfOpenWasteModal(){
+  document.getElementById('cf-waste-date').value=new Date().toISOString().split('T')[0];
+  var sel=document.getElementById('cf-waste-ing');
+  sel.innerHTML='<option>-- Select --</option>'+CF_INGREDIENTS.map(function(i){return '<option>'+i.name+'</option>';}).join('');
+  document.getElementById('cf-waste-modal').style.display='flex';
+}
+
+function cfSaveWaste(){
+  var item=document.getElementById('cf-waste-ing').value;
+  if(item==='-- Select --'){showToast('Select an ingredient',true);return;}
+  CF_WASTE.unshift({
+    date:document.getElementById('cf-waste-date').value,
+    item:item,
+    qty:parseFloat(document.getElementById('cf-waste-qty').value)||0,
+    unit:document.getElementById('cf-waste-unit').value,
+    cost:parseFloat(document.getElementById('cf-waste-cost').value)||0,
+    reason:document.getElementById('cf-waste-reason').value
+  });
+  document.getElementById('cf-waste-modal').style.display='none';
+  cfRenderWasteLog();
+  cfUpdateWasteWeekTotal();
+  showToast('Waste logged!');
+}
+
+// Close modals on overlay click
+['cf-ing-modal','cf-rec-modal','cf-waste-modal'].forEach(function(id){
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+});
 </script>
 </body>
 </html>
