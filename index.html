@@ -233,20 +233,23 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 
 .search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
 
-/* COLLAPSIBLE HEADER — collapses height, no black gap */
+/* COLLAPSIBLE HEADER
+   Strategy: opacity-only fade (GPU composited, zero layout cost)
+   Height collapses instantly via class toggle — no expensive layout animation
+   Result: buttery smooth on mobile Safari */
 #scrollableHeader{
-  overflow:hidden;
-  max-height:300px;
-  transition:max-height 0.32s cubic-bezier(0.4,0,0.2,1),
-             opacity 0.28s ease;
   opacity:1;
-  will-change:max-height,opacity;
+  transition:opacity 0.2s ease;
+  overflow:hidden;
 }
 #scrollableHeader.is-hidden{
-  max-height:0 !important;
   opacity:0;
-  transition:max-height 0.28s cubic-bezier(0.4,0,1,1),
-             opacity 0.22s ease;
+  pointer-events:none;
+}
+/* Collapse height instantly with a separate class — no transition on height */
+#scrollableHeader.is-collapsed{
+  max-height:0 !important;
+  overflow:hidden;
 }
 
 
@@ -321,48 +324,45 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .pi-dby{font-family:'DM Mono',monospace;font-size:11px;color:var(--grn);text-align:center;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
 .pi-dby.mt{color:var(--mu);}
 @media(max-width:520px){
-  /* Clean 3-column grid: [checkbox] [name] [amount] */
+  /* Single-row flex layout: no second row = no vertical imbalance */
   .pi{
-    display:grid;
-    grid-template-columns:44px 1fr 96px;
-    grid-template-rows:auto auto;
-    gap:4px 8px;
-    padding:10px 12px;
+    display:flex;
+    flex-direction:row;
     align-items:center;
+    gap:0;
+    padding:12px 12px;
+    min-height:56px;
   }
   .pi-check{
-    grid-column:1;
-    grid-row:1/3;
-    align-self:center;
-    justify-self:center;
+    width:44px;
+    height:44px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:10px;
   }
   .pi-name{
-    grid-column:2;
-    grid-row:1;
+    flex:1;
+    min-width:0;
     font-size:14px;
     font-weight:600;
-    align-self:center;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    line-height:1.3;
+    display:flex;
+    align-items:center;
   }
   .amt-in{
-    grid-column:3;
-    grid-row:1;
-    width:100%;
+    width:96px;
+    flex-shrink:0;
+    margin-left:8px;
     text-align:center;
     font-size:14px;
-    padding:6px 6px;
+    padding:8px 6px;
   }
   .pi-dby{
-    grid-column:2/4;
-    grid-row:2;
-    text-align:left;
-    font-size:11px;
-    color:var(--grn);
-    padding-left:0;
+    display:none;
   }
-  .pi-dby.mt{
+  .pi.done .pi-dby{
     display:none;
   }
 }
@@ -1595,37 +1595,46 @@ function initScrollBehavior(){
   var hdr  = document.getElementById('scrollableHeader');
   if(!body || !hdr) return;
 
-  // Set max-height to actual measured height so collapse works perfectly
-  hdr.style.maxHeight = hdr.scrollHeight + 'px';
-
   var lastY    = 0;
   var ticking  = false;
   var isHidden = false;
-  var HIDE_THRESHOLD  = 40;  // px scrolled down before hiding
-  var SHOW_THRESHOLD  = 10;  // px from top before showing again
+  var HIDE_THRESHOLD = 40; // px down before hiding
+  var SHOW_THRESHOLD = 10; // px from top before showing
+
+  function hideHeader(){
+    if(isHidden) return;
+    isHidden = true;
+    // Step 1: fade out (GPU composited, smooth)
+    hdr.classList.add('is-hidden');
+    // Step 2: after fade completes, snap height to 0 (no animation = no jank)
+    setTimeout(function(){
+      if(isHidden) hdr.classList.add('is-collapsed');
+    }, 210);
+  }
+
+  function showHeader(){
+    if(!isHidden) return;
+    isHidden = false;
+    // Step 1: restore height instantly (already hidden so invisible)
+    hdr.classList.remove('is-collapsed');
+    // Step 2: tiny delay then fade in
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        hdr.classList.remove('is-hidden');
+      });
+    });
+  }
 
   body.addEventListener('scroll', function(){
     if(ticking) return;
     ticking = true;
     requestAnimationFrame(function(){
       var y = body.scrollTop;
-
       if(y <= SHOW_THRESHOLD){
-        // Near top — show header
-        if(isHidden){
-          hdr.style.maxHeight = hdr.scrollHeight + 'px';
-          hdr.classList.remove('is-hidden');
-          isHidden = false;
-        }
+        showHeader();
       } else if(y > lastY && y > HIDE_THRESHOLD){
-        // Scrolling DOWN past threshold — hide
-        if(!isHidden){
-          hdr.classList.add('is-hidden');
-          isHidden = true;
-        }
+        hideHeader();
       }
-      // While scrolling UP but not near top: stay hidden (no action)
-
       lastY   = y;
       ticking = false;
     });
