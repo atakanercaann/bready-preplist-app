@@ -233,18 +233,23 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 
 .search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
 
-/* SCROLL HIDE — GPU accelerated */
-.scrollable-header{
-  will-change:transform;
-  transform:translateY(0);
-  transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
+/* COLLAPSIBLE HEADER — collapses height, no black gap */
+#scrollableHeader{
+  overflow:hidden;
+  max-height:300px;
+  transition:max-height 0.32s cubic-bezier(0.4,0,0.2,1),
+             opacity 0.28s ease;
+  opacity:1;
+  will-change:max-height,opacity;
 }
-.scrollable-header.is-hidden{
-  transform:translateY(-100%);
-  transition:transform 0.22s cubic-bezier(0.4,0,1,1);
+#scrollableHeader.is-hidden{
+  max-height:0 !important;
+  opacity:0;
+  transition:max-height 0.28s cubic-bezier(0.4,0,1,1),
+             opacity 0.22s ease;
 }
+
+
 .search-input{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:9px 12px 9px 34px;border-radius:9px;font-size:16px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:10px center;}
 .search-input:focus{outline:none;border-color:var(--acc);}
 .search-input::placeholder{color:var(--mu);}
@@ -316,12 +321,13 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .pi-dby{font-family:'DM Mono',monospace;font-size:11px;color:var(--grn);text-align:center;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
 .pi-dby.mt{color:var(--mu);}
 @media(max-width:520px){
+  /* Clean 3-column grid: [checkbox] [name] [amount] */
   .pi{
     display:grid;
-    grid-template-columns:44px 1fr auto;
+    grid-template-columns:44px 1fr 96px;
     grid-template-rows:auto auto;
-    gap:6px 8px;
-    padding:10px 10px;
+    gap:4px 8px;
+    padding:10px 12px;
     align-items:center;
   }
   .pi-check{
@@ -336,12 +342,17 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     font-size:14px;
     font-weight:600;
     align-self:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   .amt-in{
     grid-column:3;
     grid-row:1;
-    width:100px;
-    text-align:right;
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    padding:6px 6px;
   }
   .pi-dby{
     grid-column:2/4;
@@ -349,6 +360,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     text-align:left;
     font-size:11px;
     color:var(--grn);
+    padding-left:0;
   }
   .pi-dby.mt{
     display:none;
@@ -584,25 +596,23 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       </div>
     </div>
   </div>
-  <div class="app-fixed">
-    <div class="scrollable-header" id="scrollableHeader">
-      <div class="cal-bar">
-        <div class="cal-nav">
-          <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
-          <div class="cal-lbl" id="calLbl"></div>
-          <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
+  <div class="app-fixed" id="scrollableHeader">
+    <div class="cal-bar">
+      <div class="cal-nav">
+        <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
+        <div class="cal-lbl" id="calLbl"></div>
+        <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
       </div>
-      <div class="stabs">
-        <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
-        <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
-        <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
-        <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Activity</button>
-      </div>
-      <div class="search-wrap">
-        <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
-      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="stabs">
+      <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
+      <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
+      <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
+      <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Activity</button>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
     </div>
   </div>
   <div class="app-body">
@@ -1585,9 +1595,14 @@ function initScrollBehavior(){
   var hdr  = document.getElementById('scrollableHeader');
   if(!body || !hdr) return;
 
+  // Set max-height to actual measured height so collapse works perfectly
+  hdr.style.maxHeight = hdr.scrollHeight + 'px';
+
   var lastY    = 0;
   var ticking  = false;
   var isHidden = false;
+  var HIDE_THRESHOLD  = 40;  // px scrolled down before hiding
+  var SHOW_THRESHOLD  = 10;  // px from top before showing again
 
   body.addEventListener('scroll', function(){
     if(ticking) return;
@@ -1595,26 +1610,21 @@ function initScrollBehavior(){
     requestAnimationFrame(function(){
       var y = body.scrollTop;
 
-      if(y <= 10){
-        // Near top — always show
+      if(y <= SHOW_THRESHOLD){
+        // Near top — show header
         if(isHidden){
+          hdr.style.maxHeight = hdr.scrollHeight + 'px';
           hdr.classList.remove('is-hidden');
           isHidden = false;
         }
-      } else if(y > lastY + 4){
-        // Scrolling DOWN by more than 4px — hide
+      } else if(y > lastY && y > HIDE_THRESHOLD){
+        // Scrolling DOWN past threshold — hide
         if(!isHidden){
           hdr.classList.add('is-hidden');
           isHidden = true;
         }
-      } else if(y < lastY - 4 && y <= 10){
-        // Scrolling UP and near top — show
-        if(isHidden){
-          hdr.classList.remove('is-hidden');
-          isHidden = false;
-        }
       }
-      // Stay hidden while scrolling up but NOT near top
+      // While scrolling UP but not near top: stay hidden (no action)
 
       lastY   = y;
       ticking = false;
