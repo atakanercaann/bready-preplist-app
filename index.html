@@ -238,22 +238,18 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
    Mobile (<=768px): slides out on scroll, back at top
    ────────────────────────────────────────────── */
 #scrollableHeader{
-  overflow:hidden;
   flex-shrink:0;
 }
-#scrollableInner{
+#calWrapper{
+  overflow:hidden;
+  /* height set by JS, no transition — only translateY animates */
+}
+#calInner{
   transform:translateY(0);
+  transition:transform 0.3s ease;
+  will-change:transform;
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
-}
-@media(max-width:768px){
-  #scrollableInner{
-    will-change:transform;
-    transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
-  }
-  #scrollableHeader.is-hidden #scrollableInner{
-    transform:translateY(-101%);
-  }
 }
 
 
@@ -594,24 +590,26 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     </div>
   </div>
   <div class="app-fixed" id="scrollableHeader">
-    <div id="scrollableInner">
-      <div class="cal-bar">
-        <div class="cal-nav">
-          <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
-          <div class="cal-lbl" id="calLbl"></div>
-          <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
+    <div id="calWrapper">
+      <div id="calInner">
+        <div class="cal-bar">
+          <div class="cal-nav">
+            <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
+            <div class="cal-lbl" id="calLbl"></div>
+            <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
         </div>
-        <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="stabs">
-        <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
-        <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
-        <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
-        <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Activity</button>
-      </div>
-      <div class="search-wrap">
-        <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
-      </div>
+    </div>
+    <div class="stabs">
+      <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
+      <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
+      <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
+      <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Activity</button>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
     </div>
   </div>
   <div class="app-body">
@@ -1311,7 +1309,14 @@ function renderPanel(tab){
   var cm={hot:'hot',cold:'cold',closer:'cl'};var cls=cm[tab];
   var d=curDK();
   var dateStr=new Date(selY,selM,selD).toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});
-  html+='<div class="ph"><div class="ptitle '+cls+'">'+tm[tab]+'</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--mu)">'+dateStr+'</span><div class="pbar-wrap"><div class="pbar"><div class="pfill '+cls+'" id="pf-'+tab+'" style="width:0%"></div></div><span class="ptxt" id="pt-'+tab+'">0/0</span></div></div></div>';
+  html+='<div class="ph">'+
+    '<div class="ptitle '+cls+'">'+tm[tab]+'</div>'+
+    '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;color:var(--tx2);letter-spacing:0.5px;">'+dateStr+'</span>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+      '<div class="pbar" style="width:80px;height:6px;border-radius:3px;"><div class="pfill '+cls+'" id="pf-'+tab+'" style="width:0%;height:100%;border-radius:3px;"></div></div>'+
+      '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;letter-spacing:1px;color:var(--'+cls+')" id="pt-'+tab+'">0/0</span>'+
+    '</div>'+
+  '</div>';
   Object.keys(data.shelves).forEach(function(shelf){
     var items=data.shelves[shelf];
     var shelfClass='shelf-other';
@@ -1590,43 +1595,54 @@ function scheduleRender(){
 // SCROLL BEHAVIOR — hide header on down scroll, show at top
 // ============================================================
 function initScrollBehavior(){
-  // Desktop: header always visible — no animation needed
-  if(window.innerWidth > 768) return;
+  var body  = document.querySelector('#sApp .app-body');
+  var wrap  = document.getElementById('calWrapper');
+  var inner = document.getElementById('calInner');
+  if(!body || !wrap || !inner) return;
 
-  var body = document.querySelector('#sApp .app-body');
-  var hdr  = document.getElementById('scrollableHeader');
-  if(!body || !hdr) return;
+  var calH = inner.offsetHeight;
+  wrap.style.height = calH + 'px';
 
   var lastY    = 0;
   var ticking  = false;
   var isHidden = false;
-  var HIDE_AT  = 60;
+  var HIDE_AT  = 30;
   var SHOW_AT  = 10;
+
+  function hideCalendar(){
+    if(isHidden) return;
+    isHidden = true;
+    // Slide up — on finish, snap height to 0 (instant, no jank)
+    inner.style.transform = 'translateY(-100%)';
+    function onHideDone(){
+      inner.removeEventListener('transitionend', onHideDone);
+      if(isHidden) wrap.style.height = '0px';
+    }
+    inner.addEventListener('transitionend', onHideDone);
+  }
+
+  function showCalendar(){
+    if(!isHidden) return;
+    isHidden = false;
+    // Snap height back instantly, then slide in on next frame
+    calH = inner.offsetHeight || calH;
+    wrap.style.height = calH + 'px';
+    requestAnimationFrame(function(){
+      inner.style.transform = 'translateY(0)';
+    });
+  }
 
   body.addEventListener('scroll', function(){
     if(ticking) return;
     ticking = true;
     requestAnimationFrame(function(){
       var y = body.scrollTop;
-      if(y <= SHOW_AT && isHidden){
-        hdr.classList.remove('is-hidden');
-        isHidden = false;
-      } else if(y > lastY && y > HIDE_AT && !isHidden){
-        hdr.classList.add('is-hidden');
-        isHidden = true;
-      }
-      lastY   = y;
+      if(y <= SHOW_AT && isHidden) showCalendar();
+      else if(y > lastY && y > HIDE_AT && !isHidden) hideCalendar();
+      lastY  = y;
       ticking = false;
     });
   }, {passive:true});
-
-  // Re-check on resize (e.g. rotation)
-  window.addEventListener('resize', function(){
-    if(window.innerWidth > 768){
-      hdr.classList.remove('is-hidden');
-      isHidden = false;
-    }
-  });
 }
 
 // ============================================================
