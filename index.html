@@ -232,6 +232,19 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 }
 
 .search-wrap{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--b1);}
+
+/* SCROLL HIDE — GPU accelerated */
+.scrollable-header{
+  will-change:transform;
+  transform:translateY(0);
+  transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+.scrollable-header.is-hidden{
+  transform:translateY(-100%);
+  transition:transform 0.22s cubic-bezier(0.4,0,1,1);
+}
 .search-input{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:9px 12px 9px 34px;border-radius:9px;font-size:16px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:10px center;}
 .search-input:focus{outline:none;border-color:var(--acc);}
 .search-input::placeholder{color:var(--mu);}
@@ -304,31 +317,41 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .pi-dby.mt{color:var(--mu);}
 @media(max-width:520px){
   .pi{
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px;
+    display:grid;
+    grid-template-columns:44px 1fr auto;
+    grid-template-rows:auto auto;
+    gap:6px 8px;
     padding:10px 10px;
+    align-items:center;
   }
   .pi-check{
-    flex-shrink:0;
+    grid-column:1;
+    grid-row:1/3;
     align-self:center;
+    justify-self:center;
   }
   .pi-name{
-    flex:1;
-    min-width:0;
-    align-self:center;
+    grid-column:2;
+    grid-row:1;
     font-size:14px;
+    font-weight:600;
+    align-self:center;
   }
   .amt-in{
-    flex:1;
-    min-width:90px;
-    max-width:120px;
+    grid-column:3;
+    grid-row:1;
+    width:100px;
+    text-align:right;
   }
   .pi-dby{
-    flex:1;
-    min-width:70px;
+    grid-column:2/4;
+    grid-row:2;
     text-align:left;
     font-size:11px;
+    color:var(--grn);
+  }
+  .pi-dby.mt{
+    display:none;
   }
 }
 
@@ -562,22 +585,24 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     </div>
   </div>
   <div class="app-fixed">
-    <div class="cal-bar">
-      <div class="cal-nav">
-        <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
-        <div class="cal-lbl" id="calLbl"></div>
-        <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
+    <div class="scrollable-header" id="scrollableHeader">
+      <div class="cal-bar">
+        <div class="cal-nav">
+          <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
+          <div class="cal-lbl" id="calLbl"></div>
+          <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
-    <div class="stabs">
-      <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
-      <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
-      <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
-      <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Log</button>
-    </div>
-    <div class="search-wrap">
-      <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
+      <div class="stabs">
+        <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
+        <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
+        <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
+        <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Activity</button>
+      </div>
+      <div class="search-wrap">
+        <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
+      </div>
     </div>
   </div>
   <div class="app-body">
@@ -914,6 +939,7 @@ function openApp(){
   initLocationData();
   showScreen('sApp');
   buildCal();renderAll();renderLog();
+  initScrollBehavior();
 }
 
 // Super admin switches location
@@ -1549,6 +1575,51 @@ function scheduleRender(){
   if(document.getElementById('sApp').classList.contains('active')){
     renderAll(); renderLog(); buildCal();
   }
+}
+
+// ============================================================
+// SCROLL BEHAVIOR — hide header on down scroll, show at top
+// ============================================================
+function initScrollBehavior(){
+  var body = document.querySelector('#sApp .app-body');
+  var hdr  = document.getElementById('scrollableHeader');
+  if(!body || !hdr) return;
+
+  var lastY    = 0;
+  var ticking  = false;
+  var isHidden = false;
+
+  body.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = body.scrollTop;
+
+      if(y <= 10){
+        // Near top — always show
+        if(isHidden){
+          hdr.classList.remove('is-hidden');
+          isHidden = false;
+        }
+      } else if(y > lastY + 4){
+        // Scrolling DOWN by more than 4px — hide
+        if(!isHidden){
+          hdr.classList.add('is-hidden');
+          isHidden = true;
+        }
+      } else if(y < lastY - 4 && y <= 10){
+        // Scrolling UP and near top — show
+        if(isHidden){
+          hdr.classList.remove('is-hidden');
+          isHidden = false;
+        }
+      }
+      // Stay hidden while scrolling up but NOT near top
+
+      lastY   = y;
+      ticking = false;
+    });
+  }, {passive: true});
 }
 
 // ============================================================
