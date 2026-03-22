@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 :root{
   --bg:#0a0a0a;--s1:#141414;--s2:#1e1e1e;
@@ -739,6 +740,9 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
+
+// Sign in anonymously — invisible to users, locks DB from public access
+firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth error:', e); });
 
 // ============================================================
 // LOCATIONS CONFIG
