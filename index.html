@@ -406,7 +406,27 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .rec-actions{display:flex;gap:8px;margin-top:10px;}
 .rec-card.hidden{display:none!important;}
 
-/* DP REPORT */
+/* WASTE LOG */
+.waste-fab{
+  position:fixed;bottom:24px;right:18px;z-index:100;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--red);border:none;color:#fff;
+  font-size:22px;cursor:pointer;display:none;
+  box-shadow:0 4px 16px rgba(239,83,80,.5);
+  align-items:center;justify-content:center;
+  -webkit-appearance:none;
+}
+.waste-fab.visible{display:flex;}
+.waste-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:10px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;margin-bottom:6px;}
+.waste-info{display:flex;flex-direction:column;gap:2px;}
+.waste-item{font-size:14px;font-weight:600;color:var(--tx);}
+.waste-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);}
+.waste-reason{font-size:11px;padding:2px 7px;border-radius:8px;border:1px solid;display:inline-block;margin-top:3px;}
+.waste-reason.spoiled{background:rgba(239,83,80,.1);color:var(--red);border-color:rgba(239,83,80,.3);}
+.waste-reason.expired{background:rgba(245,166,35,.1);color:var(--acc);border-color:rgba(245,166,35,.3);}
+.waste-reason.prep{background:rgba(66,165,245,.1);color:var(--cold);border-color:rgba(66,165,245,.3);}
+.waste-reason.other{background:rgba(136,136,136,.1);color:var(--tx2);border-color:rgba(136,136,136,.2);}
+.waste-qty{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--red);text-align:right;white-space:nowrap;}
 .dp-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .dp-btn{padding:8px 13px;border:1.5px solid var(--b2);background:var(--s2);color:var(--tx2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;-webkit-appearance:none;}
 .dp-btn.active{border-color:var(--acc);color:var(--acc);background:rgba(245,166,35,.1);}
@@ -606,7 +626,8 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
       <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
       <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
-      <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Activity</button>
+      <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Log</button>
+      <button class="stab" id="tab-waste" onclick="switchTab('waste')" style="color:var(--mu);border-bottom:3px solid transparent;">🗑️ Waste</button>
     </div>
     <div class="search-wrap">
       <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
@@ -640,6 +661,44 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
           No activity logged yet today.
         </div>
       </div>
+      <div class="panel" id="panel-waste" style="padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--red);">🗑️ WASTE LOG</div>
+          <button class="btn sm danger" onclick="openWasteModal()">+ Log Waste</button>
+        </div>
+        <div id="wasteList"></div>
+        <div id="wasteEmpty" style="text-align:center;padding:48px 20px;color:var(--mu);font-family:'DM Mono',monospace;font-size:13px;">
+          <div style="font-size:32px;margin-bottom:10px;">🗑️</div>
+          No waste logged today.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WASTE MODAL -->
+<div class="mov" id="wasteModal">
+  <div class="mbox" style="max-width:500px;">
+    <div class="mttl" style="color:var(--red);">LOG WASTE</div>
+    <div class="fg" style="margin-bottom:8px;"><label class="lbl">Food Item</label>
+      <input id="wItem" class="lf" type="text" placeholder="e.g. Spinach Sautee" autocorrect="off" autocapitalize="words">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div class="fg"><label class="lbl">Quantity</label>
+        <input id="wQty" class="lf" type="text" placeholder="e.g. 2 portions">
+      </div>
+      <div class="fg"><label class="lbl">Reason</label>
+        <select id="wReason" class="lf" style="background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:13px 12px;border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;width:100%;">
+          <option value="spoiled">Spoiled</option>
+          <option value="expired">Expired</option>
+          <option value="prep">Prep Error</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="mbtns">
+      <button class="mc" onclick="closeWasteModal()">Cancel</button>
+      <button style="flex:1;padding:13px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;background:var(--red);color:#fff;" onclick="logWaste()">Log Waste</button>
     </div>
   </div>
 </div>
@@ -886,7 +945,7 @@ function clearListeners(){ _listeners.forEach(function(fn){fn();}); _listeners=[
 
 function initLocationData(){
   clearListeners();
-  S = { emps:[], items:{}, log:[], history:[], recipes:[] };
+  S = { emps:[], items:{}, log:[], history:[], recipes:[], waste:[] };
 
   // Employees
   var empRef = db.ref(cLoc+'/emps');
@@ -924,6 +983,11 @@ function initLocationData(){
   var recRef = db.ref('shared/recipes');
   recRef.on('value', function(snap){ S.recipes=snap.val()||[]; });
   _listeners.push(function(){ recRef.off(); });
+
+  // Waste log — per location
+  var wasteRef = db.ref(cLoc+'/waste');
+  wasteRef.on('value', function(snap){ S.waste=snap.val()||[]; renderWaste(); });
+  _listeners.push(function(){ wasteRef.off(); });
 }
 
 // Overrides for shared recipes
@@ -1281,35 +1345,6 @@ function exportLog(){
 // REPORT DOWNLOAD
 // ============================================================
 function setPeriod(p,btn){dlPeriod=p;document.querySelectorAll('.dp-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');document.getElementById('customRange').style.display=p==='custom'?'block':'none';}
-function getDates(){
-  var now=new Date(),from,to=now;
-  if(dlPeriod==='week'){from=new Date(now);from.setDate(now.getDate()-((now.getDay()+6)%7));from.setHours(0,0,0,0);}
-  else if(dlPeriod==='2week'){from=new Date(now);from.setDate(now.getDate()-((now.getDay()+6)%7)-7);from.setHours(0,0,0,0);}
-  else if(dlPeriod==='month'){from=new Date(now.getFullYear(),now.getMonth(),1);}
-  else{var fv=document.getElementById('rFrom').value,tv=document.getElementById('rTo').value;if(!fv||!tv){showToast('Select dates',true);return null;}from=new Date(fv);to=new Date(tv);}
-  var dates=[],cur=new Date(from);cur.setHours(0,0,0,0);var end=new Date(to);end.setHours(23,59,59,0);
-  while(cur<=end){dates.push(dk(cur.getFullYear(),cur.getMonth(),cur.getDate()));cur.setDate(cur.getDate()+1);}
-  return dates;
-}
-function downloadReport(){
-  var dates=getDates();if(!dates||!dates.length){showToast('No dates selected',true);return;}
-  var rows=[['Date','Location','Station','Shelf','Item','Amount','Done By','Time']];
-  dates.forEach(function(d){
-    ['hot','cold','closer'].forEach(function(tab){
-      Object.keys(PREP[tab].shelves).forEach(function(shelf){
-        PREP[tab].shelves[shelf].forEach(function(item){
-          var s=getIt(tab,d,item);
-          if(s.done||s.amount)rows.push([d,LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc,tab,shelf,item,s.amount||(s.done?'done':''),s.by||'',s.time||'']);
-        });
-      });
-    });
-  });
-  if(rows.length<=1){showToast('No data for that period',true);return;}
-  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-  var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download='bready_'+(cLoc||'')+'_'+dlPeriod+'_'+dates[0]+'.csv';a.click();
-  showToast('Downloaded!');
-}
 
 // ============================================================
 // WEEK RESET
@@ -1381,18 +1416,21 @@ function updateStats(){
 function switchTab(tab){
   cTab=tab;
   var si=document.getElementById('prepSearch');if(si&&si.value){si.value='';filterItems('');}
-  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');t.style.opacity='';});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');p.style.display='';});
-  // Show/hide search bar — hide on activity tab
-  var sw=document.getElementById('prepSearch');
-  if(sw)sw.parentElement.style.display=(tab==='activity')?'none':'block';
+  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');t.style.opacity='';t.style.borderBottomColor='';t.style.color='';});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  var sw=document.querySelector('.search-wrap');
+  if(sw)sw.style.display=(tab==='activity'||tab==='waste')?'none':'block';
   if(tab==='activity'){
-    document.getElementById('tab-activity').classList.add('active');
-    document.getElementById('tab-activity').style.borderBottomColor='var(--acc)';
-    document.getElementById('tab-activity').style.color='var(--acc)';
+    var ta=document.getElementById('tab-activity');
+    ta.classList.add('active');ta.style.borderBottomColor='var(--acc)';ta.style.color='var(--acc)';
     document.getElementById('panel-activity').classList.add('active');
-    renderActivityFull();
-    return;
+    renderActivityFull();return;
+  }
+  if(tab==='waste'){
+    var tw=document.getElementById('tab-waste');
+    tw.classList.add('active');tw.style.borderBottomColor='var(--red)';tw.style.color='var(--red)';
+    document.getElementById('panel-waste').classList.add('active');
+    renderWaste();return;
   }
   var m={hot:'hot',cold:'cold',closer:'cl'};
   document.getElementById('tab-'+m[tab]).classList.add('active');
@@ -1527,7 +1565,7 @@ var RECIPES_DEFAULT=[
   {id:'r12',name:'Truffle Bechamel',cat:'sauces',ingredients:'Butter — 454g\nFlour — 250g\n35% cream — 1523g\nTruffle mushroom — 18g\nSalt — 10g\nPepper — 3g'},
   {id:'r13',name:'Tuna Mix',cat:'proteins',ingredients:'Chunk light tuna — 1 can\nMayonnaise — 400ml\nLemon juice — 40ml\nDijon mustard — 30ml\nGreen onion (white part) — 70g'},
   {id:'r14',name:'Kalamata Tapenade',cat:'sauces',ingredients:'Kalamata olives, pitted — 600g\nVirgin olive oil — 330ml\nGarlic — 30g\nCapers — 140ml\nThyme — 5g'},
-  {id:'r15',name:'Roasted Sweet Potato',cat:'salads',ingredients:'Yam — 1kg\nOlive oil — 150g\nFine salt — 30g\nSage — 0.1 ea\nBrown sugar — 10g'},
+  {id:'r15',name:'Roasted Sweet Potato',cat:'salads',ingredients:'Yam Jumbo — 1 Kg\nVirgin Olive Oil (Costco) — 50 ml\nFine Salt — 10 g\nSage — 0.1 EA\nBrown Sugar Packets — 2 EA'},
   {id:'r16',name:'Pesto',cat:'sauces',ingredients:'Fresh Basil Leaves — 400g\nGarlic — 3 cloves\nGrated Parmesan — 200g\nPine Nuts — 100g\nOlive Oil — 600g\nSalt — 15g'},
   {id:'r17',name:'Spicy Mayonnaise',cat:'sauces',ingredients:'Mayonnaise — 960g\nSriracha — 80g\nGarlic oil — 10g\nHoney — 40g'},
   {id:'r18',name:'Mustard Aioli',cat:'sauces',ingredients:'Dijon grain mustard — 60g\nMayonnaise — 350g'},
@@ -1547,7 +1585,7 @@ function openRecipes(){
   showScreen('sRecipes');
   var addBtn=document.getElementById('recAddBtn');
   // Only super admin and managers can edit recipes (shared)
-  if(addBtn)addBtn.style.display=(cUser&&(cUser.role==='super'||cUser.role==='manager'))?'block':'none';
+  if(addBtn)addBtn.style.display=(cUser&&(cUser.role==='super'||cUser.role==='manager'||cUser.role==='km'))?'block':'none';
   renderRecipes();
 }
 function renderRecipes(){
@@ -1558,7 +1596,7 @@ function renderRecipes(){
   recs.forEach(function(r){
     var tag=cats[r.cat]||r.cat;
     var ings=r.ingredients.split('\n').filter(function(l){return l.trim();}).map(function(l){return'<li>'+l.trim()+'</li>';}).join('');
-    var canEdit=cUser&&(cUser.role==='super'||cUser.role==='manager');
+    var canEdit=cUser&&(cUser.role==='super'||cUser.role==='manager'||cUser.role==='km');
     var adminBtns=canEdit?'<div class="rec-actions"><button class="btn sm acc" onclick="editRecipe(\''+r.id+'\');event.stopPropagation()">Edit</button><button class="btn sm danger" onclick="deleteRecipe(\''+r.id+'\');event.stopPropagation()">Delete</button></div>':'';
     html+='<div class="rec-card" id="rc-'+r.id+'"><div class="rec-card-hdr" onclick="toggleRecCard(\''+r.id+'\')"><div class="rec-card-name">'+r.name+'</div><span class="rec-card-tag '+r.cat+'">'+tag+'</span></div><div class="rec-card-body" id="rcb-'+r.id+'"><ul class="rec-ing">'+ings+'</ul>'+adminBtns+'</div></div>';
   });
@@ -1614,6 +1652,109 @@ function scheduleRender(){
   if(document.getElementById('sApp').classList.contains('active')){
     renderAll(); renderLog(); buildCal();
   }
+}
+
+// ============================================================
+// WASTE LOG
+// ============================================================
+function openWasteModal(){
+  document.getElementById('wItem').value='';
+  document.getElementById('wQty').value='';
+  document.getElementById('wReason').value='spoiled';
+  document.getElementById('wasteModal').classList.add('open');
+  setTimeout(function(){document.getElementById('wItem').focus();},100);
+}
+function closeWasteModal(){
+  document.getElementById('wasteModal').classList.remove('open');
+}
+function logWaste(){
+  var item=document.getElementById('wItem').value.trim();
+  var qty=document.getElementById('wQty').value.trim();
+  var reason=document.getElementById('wReason').value;
+  if(!item){showToast('Enter a food item',true);return;}
+  if(!qty){showToast('Enter a quantity',true);return;}
+  var now=new Date();
+  var entry={
+    id:'w'+Date.now(),
+    item:item,
+    qty:qty,
+    reason:reason,
+    by:cUser.name,
+    date:dk(now.getFullYear(),now.getMonth(),now.getDate()),
+    time:now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}),
+    ts:Date.now()
+  };
+  var list=Array.isArray(S.waste)?S.waste.slice():[];
+  list.unshift(entry);
+  db.ref(cLoc+'/waste').set(list).then(function(){
+    setSyncStatus('on');
+    closeWasteModal();
+    showToast('🗑️ Waste logged');
+    switchTab('waste');
+  }).catch(function(e){setSyncStatus('off');console.error(e);});
+}
+function renderWaste(){
+  var list=document.getElementById('wasteList');
+  var empty=document.getElementById('wasteEmpty');
+  if(!list||!empty)return;
+  var todayKey=dk(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  // Show today's waste, sorted newest first
+  var todayWaste=(S.waste||[]).filter(function(w){return w.date===todayKey;});
+  if(!todayWaste.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  var reasonLabels={spoiled:'Spoiled',expired:'Expired',prep:'Prep Error',other:'Other'};
+  list.innerHTML=todayWaste.map(function(w){
+    return '<div class="waste-row">'+
+      '<div class="waste-info">'+
+        '<div class="waste-item">'+w.item+'</div>'+
+        '<div class="waste-meta">'+w.by+' · '+w.time+'</div>'+
+        '<span class="waste-reason '+w.reason+'">'+reasonLabels[w.reason]+'</span>'+
+      '</div>'+
+      '<div class="waste-qty">'+w.qty+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ============================================================
+// REPORT DOWNLOAD — includes prep + waste
+// ============================================================
+function downloadReport(){
+  var dates=getDates();if(!dates||!dates.length){showToast('No dates selected',true);return;}
+
+  // Sheet 1: Prep
+  var prepRows=[['Date','Location','Station','Shelf','Item','Amount','Done By','Time']];
+  dates.forEach(function(d){
+    ['hot','cold','closer'].forEach(function(tab){
+      Object.keys(PREP[tab].shelves).forEach(function(shelf){
+        PREP[tab].shelves[shelf].forEach(function(item){
+          var s=getIt(tab,d,item);
+          if(s.done||s.amount)prepRows.push([d,LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc,tab,shelf,item,s.amount||(s.done?'done':''),s.by||'',s.time||'']);
+        });
+      });
+    });
+  });
+
+  // Sheet 2: Waste
+  var wasteRows=[['Date','Location','Item','Quantity','Reason','Logged By','Time']];
+  var dateSet={};dates.forEach(function(d){dateSet[d]=1;});
+  (S.waste||[]).forEach(function(w){
+    if(dateSet[w.date]){
+      var reasonLabels={spoiled:'Spoiled',expired:'Expired',prep:'Prep Error',other:'Other'};
+      wasteRows.push([w.date,LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc,w.item,w.qty,reasonLabels[w.reason]||w.reason,w.by,w.time]);
+    }
+  });
+
+  // Combine into one CSV with clear section headers
+  var prepCsv=prepRows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var wasteCsv=wasteRows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var combined='PREP LOG\n'+prepCsv+'\n\nWASTE LOG\n'+wasteCsv;
+
+  var blob=new Blob([combined],{type:'text/csv'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='bready_'+(LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc)+'_'+dlPeriod+'_'+dates[0]+'.csv';
+  a.click();
+  showToast('Downloaded!');
 }
 
 // ============================================================
