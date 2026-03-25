@@ -51,7 +51,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .load-dot:nth-child(3){animation-delay:.4s;}
 @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
 
-.screen{display:none;position:fixed;inset:0;background:var(--bg);}
+.screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:1;}
 .screen.active{display:flex;flex-direction:column;}
 
 /* LOCATION SELECT */
@@ -101,9 +101,9 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .sync-dot.syncing{background:var(--acc);animation:pulse .8s ease-in-out infinite;}
 
 /* USER MENU */
-.umenu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;}
+.umenu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;}
 .umenu-overlay.open{display:block;}
-.umenu{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-radius:20px 20px 0 0;border:1px solid var(--b2);z-index:201;transform:translateY(100%);transition:transform .25s ease;max-width:480px;margin:0 auto;}
+.umenu{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-radius:20px 20px 0 0;border:1px solid var(--b2);z-index:501;transform:translateY(100%);transition:transform .25s ease;max-width:480px;margin:0 auto;}
 .umenu.open{transform:translateY(0);}
 .umenu-handle{width:40px;height:4px;background:var(--b2);border-radius:2px;margin:12px auto 0;}
 .umenu-head{display:flex;align-items:center;gap:14px;padding:16px 20px 12px;}
@@ -125,7 +125,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .loc-sw-btn.active{border-color:var(--acc);color:var(--acc);background:rgba(245,166,35,.1);}
 
 /* PIN MODAL */
-.pin-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;}
+.pin-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px;}
 .pin-modal.open{display:flex;}
 .pin-box{background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:24px;width:100%;max-width:360px;}
 .pin-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--acc);margin-bottom:16px;}
@@ -367,7 +367,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 }
 
 /* MODAL */
-.mov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .mov.open{display:flex;}
 @media(min-width:500px){.mov{align-items:center;}}
 .mbox{background:var(--s1);border:1px solid var(--b2);border-radius:18px 18px 0 0;padding:24px;width:100%;max-width:460px;}
@@ -379,7 +379,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .mk{background:var(--acc);color:#000;}
 
 /* TOAST */
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s2);border:1px solid var(--b2);border-left:4px solid var(--grn);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;z-index:400;opacity:0;transition:all .25s;white-space:nowrap;pointer-events:none;}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s2);border:1px solid var(--b2);border-left:4px solid var(--grn);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;z-index:700;opacity:0;transition:all .25s;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.warn{border-left-color:var(--acc);}
 
@@ -640,42 +640,12 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <div class="panel hot active" id="panel-hot"></div>
       <div class="panel cold" id="panel-cold"></div>
       <div class="panel closer" id="panel-closer"></div>
-      <div class="panel" id="panel-activity" style="padding:14px;">
-        <!-- Full calendar lives here -->
-        <div class="act-cal-bar">
-          <div class="cal-nav">
-            <button class="cal-nbtn" onclick="prevMonth()">&#8592;</button>
-            <div class="cal-lbl" id="calLbl"></div>
-            <button class="cal-nbtn" onclick="nextMonth()">&#8594;</button>
-          </div>
-          <div style="margin-bottom:5px;"></div>
-          <div class="cal-grid" id="calGrid"></div>
-        </div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--acc);margin-bottom:4px;">📋 TODAY'S LOG</div>
-        <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;font-family:'DM Mono',monospace;" id="actDateLabel"></div>
-        <div id="activityFullLog" style="display:flex;flex-direction:column;gap:8px;"></div>
-        <div id="activityEmpty" style="text-align:center;padding:48px 20px;color:var(--mu);font-family:'DM Mono',monospace;font-size:13px;display:none;">
-          <div style="font-size:32px;margin-bottom:10px;">📋</div>
-          No activity logged yet today.
-        </div>
-      </div>
-      <div class="panel" id="panel-waste" style="padding:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--red);">🗑️ WASTE LOG</div>
-          <button class="btn sm danger" onclick="openWasteModal()">+ Log Waste</button>
-        </div>
-        <div id="wasteList"></div>
-        <div id="wasteEmpty" style="text-align:center;padding:48px 20px;color:var(--mu);font-family:'DM Mono',monospace;font-size:13px;">
-          <div style="font-size:32px;margin-bottom:10px;">🗑️</div>
-          No waste logged today.
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
 <!-- WASTE MODAL -->
-<div class="mov" id="wasteModal">
+<div class="mov" id="wasteModal" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:flex-end;justify-content:center;">
   <div class="mbox" style="max-width:500px;">
     <div class="mttl" style="color:var(--red);">LOG WASTE</div>
     <div class="fg" style="margin-bottom:8px;"><label class="lbl">Food Item</label>
@@ -741,7 +711,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
   </div>
 </div>
 
-<div class="mov" id="mov">
+<div class="mov" id="mov" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:flex-end;justify-content:center;">
   <div class="mbox">
     <div class="mttl" id="mttl">CONFIRM</div>
     <div id="mbody" style="font-size:14px;color:var(--tx2);line-height:1.7"></div>
@@ -812,7 +782,7 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 </div>
 
 <!-- RECIPE MODAL — top level so it works on all screens -->
-<div class="mov" id="recModal">
+<div class="mov" id="recModal" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:flex-end;justify-content:center;">
   <div class="mbox" style="max-width:500px;">
     <div class="mttl" id="recModalTitle">ADD RECIPE</div>
     <input id="recName" class="lf" type="text" placeholder="Recipe name" autocorrect="off" style="margin-bottom:8px;">
@@ -846,7 +816,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
-// Sign in anonymously — invisible to users, locks DB from public access
+// Wait for anonymous auth before starting — required by our security rules
+firebase.auth().onAuthStateChanged(function(user){
+  if(!user){
+    firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth error:', e); });
+  }
+});
 firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth error:', e); });
 
 // ============================================================
@@ -1493,7 +1468,7 @@ function renderLog(){
   var el=document.getElementById('logEl');if(!el)return;
   var d=curDK(),lg=(S.log||[]).filter(function(e){return e.dk===d;});
   el.innerHTML=lg.length?lg.slice(0,10).map(function(e){return'<div class="ale"><span class="ale-t">'+e.t+'</span><span class="ale-m">'+e.msg+'</span></div>';}).join(''):'<div class="ale"><span class="ale-m" style="color:var(--mu)">No activity yet.</span></div>';
-  if(cTab==='activity')renderActivityFull();
+  if(document.getElementById('sActivity')&&document.getElementById('sActivity').classList.contains('active'))renderActivityScreen();
 }
 
 function renderActivityFull(){
@@ -1541,8 +1516,15 @@ function filterItems(q){
 // ============================================================
 // MODAL & TOAST
 // ============================================================
-function openMod(t,b,cb){document.getElementById('mttl').textContent=t;document.getElementById('mbody').innerHTML=b;document.getElementById('mok').onclick=function(){cb();closeMod();};document.getElementById('mov').classList.add('open');}
-function closeMod(){document.getElementById('mov').classList.remove('open');}
+function openMod(t,b,cb){
+  document.getElementById('mttl').textContent=t;
+  document.getElementById('mbody').innerHTML=b;
+  document.getElementById('mok').onclick=function(){cb();closeMod();};
+  var m=document.getElementById('mov');
+  document.body.appendChild(m);
+  m.style.display='flex';
+}
+function closeMod(){document.getElementById('mov').style.display='none';}
 document.getElementById('mov').addEventListener('click',function(e){if(e.target===e.currentTarget)closeMod();});
 var _tt;
 function showToast(msg,warn){clearTimeout(_tt);var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(warn?' warn':'');_tt=setTimeout(function(){t.classList.remove('show');},2800);}
@@ -1645,8 +1627,28 @@ function renderRecipes(){
 }
 function toggleRecCard(id){var body=document.getElementById('rcb-'+id);if(body)body.classList.toggle('open');}
 function filterRecipes(q){q=q.toLowerCase().trim();document.querySelectorAll('.rec-card').forEach(function(card){var name=card.querySelector('.rec-card-name');if(!name)return;card.classList.toggle('hidden',!q||!name.textContent.toLowerCase().includes(q));});}
-function openAddRecipe(){recEditId=null;document.getElementById('recModalTitle').textContent='ADD RECIPE';document.getElementById('recName').value='';document.getElementById('recCat').value='sauces';document.getElementById('recIngredients').value='';document.getElementById('recModal').classList.add('open');}
-function editRecipe(id){var recs=S.recipes&&S.recipes.length?S.recipes:RECIPES_DEFAULT;var r=recs.find(function(x){return x.id===id;});if(!r)return;recEditId=id;document.getElementById('recModalTitle').textContent='EDIT RECIPE';document.getElementById('recName').value=r.name;document.getElementById('recCat').value=r.cat;document.getElementById('recIngredients').value=r.ingredients;document.getElementById('recModal').classList.add('open');}
+function openAddRecipe(){
+  recEditId=null;
+  document.getElementById('recModalTitle').textContent='ADD RECIPE';
+  document.getElementById('recName').value='';
+  document.getElementById('recCat').value='sauces';
+  document.getElementById('recIngredients').value='';
+  var m=document.getElementById('recModal');
+  document.body.appendChild(m);
+  m.style.display='flex';
+}
+function editRecipe(id){
+  var recs=S.recipes&&S.recipes.length?S.recipes:RECIPES_DEFAULT;
+  var r=recs.find(function(x){return x.id===id;});if(!r)return;
+  recEditId=id;
+  document.getElementById('recModalTitle').textContent='EDIT RECIPE';
+  document.getElementById('recName').value=r.name;
+  document.getElementById('recCat').value=r.cat;
+  document.getElementById('recIngredients').value=r.ingredients;
+  var m=document.getElementById('recModal');
+  document.body.appendChild(m);
+  m.style.display='flex';
+}
 function saveRecipe(){
   var name=document.getElementById('recName').value.trim(),cat=document.getElementById('recCat').value,ingredients=document.getElementById('recIngredients').value.trim();
   if(!name){showToast('Enter a recipe name',true);return;}if(!ingredients){showToast('Enter ingredients',true);return;}
@@ -1656,7 +1658,7 @@ function saveRecipe(){
   fbSet('shared/recipes',recs);closeRecModal();showToast(recEditId?'Recipe updated!':'Recipe added!');
 }
 function deleteRecipe(id){openMod('DELETE RECIPE','Are you sure you want to delete this recipe?',function(){var recs=S.recipes&&S.recipes.length?JSON.parse(JSON.stringify(S.recipes)):JSON.parse(JSON.stringify(RECIPES_DEFAULT));fbSet('shared/recipes',recs.filter(function(r){return r.id!==id;}));showToast('Recipe deleted');});}
-function closeRecModal(){document.getElementById('recModal').classList.remove('open');}
+function closeRecModal(){document.getElementById('recModal').style.display='none';}
 
 // ============================================================
 // ============================================================
@@ -1789,11 +1791,13 @@ function openWasteModal(){
   document.getElementById('wItem').value='';
   document.getElementById('wQty').value='';
   document.getElementById('wReason').value='spoiled';
-  document.getElementById('wasteModal').classList.add('open');
+  var m=document.getElementById('wasteModal');
+  document.body.appendChild(m);
+  m.style.display='flex';
   setTimeout(function(){document.getElementById('wItem').focus();},100);
 }
 function closeWasteModal(){
-  document.getElementById('wasteModal').classList.remove('open');
+  document.getElementById('wasteModal').style.display='none';
 }
 function logWaste(){
   var item=document.getElementById('wItem').value.trim();
@@ -1865,10 +1869,16 @@ function downloadReport(){
 }
 
 // ============================================================
-// START
+// START — wait for Firebase auth before showing app
 // ============================================================
-document.getElementById('sLoad').style.display='none';
-showScreen('sLocation');
+firebase.auth().onAuthStateChanged(function(user){
+  if(user){
+    document.getElementById('sLoad').style.display='none';
+    showScreen('sLocation');
+  }
+});
+// Show load screen immediately while waiting
+document.getElementById('sLoad').style.display='flex';
 </script>
 </body>
 </html>
