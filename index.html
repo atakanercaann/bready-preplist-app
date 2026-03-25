@@ -626,8 +626,6 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
       <button class="stab hot active" id="tab-hot" onclick="switchTab('hot')">🔥 Hot<span class="cnt" id="tc-hot">0/0</span></button>
       <button class="stab cold" id="tab-cold" onclick="switchTab('cold')">❄️ Cold<span class="cnt" id="tc-cold">0/0</span></button>
       <button class="stab cl" id="tab-cl" onclick="switchTab('closer')">🌙 Closer<span class="cnt" id="tc-cl">0/0</span></button>
-      <button class="stab" id="tab-activity" onclick="switchTab('activity')" style="color:var(--mu);border-bottom:3px solid transparent;">📋 Log</button>
-      <button class="stab" id="tab-waste" onclick="switchTab('waste')" style="color:var(--mu);border-bottom:3px solid transparent;">🗑️ Waste</button>
     </div>
     <div class="search-wrap">
       <input class="search-input" id="prepSearch" type="text" placeholder="Search all stations..." oninput="filterItems(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
@@ -718,10 +716,12 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
   <div class="umenu-items">
     <button class="umenu-item" id="umAdminBtn" onclick="closeUserMenu();goToAdmin();"><span class="mi-ico">⚙︎</span><div><div class="mi-lbl">Admin Panel</div><div class="mi-sub">Roster, reports, history</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();openRecipes();"><span class="mi-ico">📖</span><div><div class="mi-lbl">Recipes</div><div class="mi-sub">View all prep recipes</div></div></button>
+    <button class="umenu-item" onclick="closeUserMenu();openActivitySheet();"><span class="mi-ico">📋</span><div><div class="mi-lbl">Activity Log</div><div class="mi-sub">Today's prep activity</div></div></button>
+    <button class="umenu-item" onclick="closeUserMenu();openWasteSheet();"><span class="mi-ico">🗑️</span><div><div class="mi-lbl">Waste Log</div><div class="mi-sub">Log & view food waste</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();openChangePIN();"><span class="mi-ico">🔑</span><div><div class="mi-lbl">Change My PIN</div><div class="mi-sub">Update your 4-digit code</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();toggleTheme();"><span class="mi-ico" id="themeIcon">☀️</span><div><div class="mi-lbl" id="themeLabel">Light Mode</div><div class="mi-sub" id="themeSub">Switch to light theme</div></div></button>
     <div class="umenu-divider" style="margin:8px 0;"></div>
-<button class="umenu-item danger" onclick="closeUserMenu();showScreen('sLogin');"><span class="mi-ico">⏻</span><div><div class="mi-lbl">Log Out</div></div></button>
+    <button class="umenu-item danger" onclick="closeUserMenu();showScreen('sLogin');"><span class="mi-ico">⏻</span><div><div class="mi-lbl">Log Out</div></div></button>
   </div>
 </div>
 
@@ -765,7 +765,53 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
   <div class="rec-body app-body" id="recipeList"></div>
 </div>
 
-<!-- RECIPE MODAL -->
+<!-- ACTIVITY SCREEN -->
+<div id="sActivity" class="screen">
+  <div class="rec-header app-fixed">
+    <div class="rec-title" style="color:var(--acc);">📋 ACTIVITY</div>
+    <button class="btn sm" onclick="showScreen('sApp')">← Back</button>
+  </div>
+  <div class="rec-body app-body" style="padding:14px;" id="activityScreenBody">
+    <div class="act-cal-bar">
+      <div class="cal-nav">
+        <button class="cal-nbtn" onclick="prevMonth();renderActivityScreen()">&#8592;</button>
+        <div class="cal-lbl" id="actCalLbl"></div>
+        <button class="cal-nbtn" onclick="nextMonth();renderActivityScreen()">&#8594;</button>
+      </div>
+      <div style="margin-bottom:5px;"></div>
+      <div class="cal-grid" id="actCalGrid"></div>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--acc);margin-bottom:4px;">TODAY'S LOG</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;font-family:'DM Mono',monospace;" id="actScreenDateLabel"></div>
+    <div id="actScreenLog" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="actScreenEmpty" style="text-align:center;padding:48px 20px;color:var(--mu);font-family:'DM Mono',monospace;font-size:13px;">
+      <div style="font-size:32px;margin-bottom:10px;">📋</div>No activity logged yet.
+    </div>
+  </div>
+</div>
+
+<!-- WASTE SCREEN -->
+<div id="sWaste" class="screen">
+  <div class="rec-header app-fixed" style="border-bottom-color:var(--red);">
+    <div class="rec-title" style="color:var(--red);">🗑️ WASTE</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn sm danger" onclick="openWasteModal()">+ Add</button>
+      <button class="btn sm" onclick="showScreen('sApp')">← Back</button>
+    </div>
+  </div>
+  <div class="rec-body app-body" style="padding:14px;" id="wasteScreenBody">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:6px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--tx2);" id="wasteDateHeader"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);" id="wasteLocHeader"></div>
+    </div>
+    <div id="wasteScreenList"></div>
+    <div id="wasteScreenEmpty" style="text-align:center;padding:48px 20px;color:var(--mu);font-family:'DM Mono',monospace;font-size:13px;">
+      <div style="font-size:32px;margin-bottom:10px;">🗑️</div>No waste logged today.
+    </div>
+  </div>
+</div>
+
+<!-- RECIPE MODAL — top level so it works on all screens -->
 <div class="mov" id="recModal">
   <div class="mbox" style="max-width:500px;">
     <div class="mttl" id="recModalTitle">ADD RECIPE</div>
@@ -986,7 +1032,13 @@ function initLocationData(){
 
   // Waste log — per location
   var wasteRef = db.ref(cLoc+'/waste');
-  wasteRef.on('value', function(snap){ S.waste=snap.val()||[]; renderWaste(); });
+  wasteRef.on('value', function(snap){
+    var raw=snap.val()||{};
+    // Firebase push returns object with keys, convert to array sorted by ts
+    if(Array.isArray(raw)) S.waste=raw;
+    else S.waste=Object.values(raw).sort(function(a,b){return b.ts-a.ts;});
+    renderWasteScreen();
+  });
   _listeners.push(function(){ wasteRef.off(); });
 }
 
@@ -1416,25 +1468,14 @@ function updateStats(){
 function switchTab(tab){
   cTab=tab;
   var si=document.getElementById('prepSearch');if(si&&si.value){si.value='';filterItems('');}
-  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');t.style.opacity='';t.style.borderBottomColor='';t.style.color='';});
+  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');t.style.borderBottomColor='';t.style.color='';});
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  var sw=document.querySelector('.search-wrap');
-  if(sw)sw.style.display=(tab==='activity'||tab==='waste')?'none':'block';
-  if(tab==='activity'){
-    var ta=document.getElementById('tab-activity');
-    ta.classList.add('active');ta.style.borderBottomColor='var(--acc)';ta.style.color='var(--acc)';
-    document.getElementById('panel-activity').classList.add('active');
-    renderActivityFull();return;
-  }
-  if(tab==='waste'){
-    var tw=document.getElementById('tab-waste');
-    tw.classList.add('active');tw.style.borderBottomColor='var(--red)';tw.style.color='var(--red)';
-    document.getElementById('panel-waste').classList.add('active');
-    renderWaste();return;
-  }
+  var sw=document.querySelector('.search-wrap');if(sw)sw.style.display='block';
   var m={hot:'hot',cold:'cold',closer:'cl'};
-  document.getElementById('tab-'+m[tab]).classList.add('active');
-  document.getElementById('panel-'+tab).classList.add('active');
+  var tid=document.getElementById('tab-'+m[tab]);
+  if(tid)tid.classList.add('active');
+  var pid=document.getElementById('panel-'+tab);
+  if(pid)pid.classList.add('active');
 }
 function toggleDone(tab,d,item){
   var s=getIt(tab,d,item),t=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}),nd=!s.done;
@@ -1654,6 +1695,93 @@ function scheduleRender(){
   }
 }
 
+function openActivitySheet(){
+  showScreen('sActivity');
+  renderActivityScreen();
+  // sync calendar labels
+  var lbl=document.getElementById('actCalLbl');
+  if(lbl)lbl.textContent=MONTHS[calM]+' '+calY;
+  buildActCal();
+}
+function buildActCal(){
+  var lbl=document.getElementById('actCalLbl');
+  if(lbl)lbl.textContent=MONTHS[calM]+' '+calY;
+  var g=document.getElementById('actCalGrid');if(!g)return;
+  var tDK=dk(today.getFullYear(),today.getMonth(),today.getDate());
+  var sDK=dk(selY,selM,selD);
+  var html='';
+  DNAMES.forEach(function(d){html+='<div class="cal-dhdr">'+d+'</div>';});
+  var first=new Date(calY,calM,1).getDay(),dim=new Date(calY,calM+1,0).getDate(),diPrev=new Date(calY,calM,0).getDate();
+  for(var i=0;i<first;i++){var pd=diPrev-first+1+i,py=calM===0?calY-1:calY,pm=calM===0?11:calM-1;var d=dk(py,pm,pd);html+='<div class="cal-day other'+(d===tDK?' today':'')+(d===sDK?' active':'')+(hasData(d)?' has-data':'')+'" onclick="selDate('+py+','+pm+','+pd+');renderActivityScreen()">'+pd+'</div>';}
+  for(var day=1;day<=dim;day++){var d=dk(calY,calM,day);html+='<div class="cal-day'+(d===tDK?' today':'')+(d===sDK?' active':'')+(hasData(d)?' has-data':'')+'" onclick="selDate('+calY+','+calM+','+day+');renderActivityScreen()">'+day+'</div>';}
+  var used=first+dim,rows=Math.ceil(used/7),total=rows*7,next=1;
+  for(var i=used;i<total;i++){var ny=calM===11?calY+1:calY,nm=calM===11?0:calM+1;var d=dk(ny,nm,next);html+='<div class="cal-day other'+(d===tDK?' today':'')+(d===sDK?' active':'')+(hasData(d)?' has-data':'')+'" onclick="selDate('+ny+','+nm+','+next+');renderActivityScreen()">'+next+'</div>';next++;}
+  g.innerHTML=html;
+}
+function renderActivityScreen(){
+  var lbl=document.getElementById('actScreenDateLabel');
+  var logEl=document.getElementById('actScreenLog');
+  var empty=document.getElementById('actScreenEmpty');
+  if(!logEl||!empty)return;
+  var dateStr=new Date(selY,selM,selD).toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});
+  if(lbl)lbl.textContent=dateStr;
+  var d=curDK();
+  var entries=S.log.filter(function(e){return e.dt===d;});
+  if(!entries.length){logEl.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  logEl.innerHTML=entries.map(function(e){
+    return '<div style="background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:baseline;">'+
+      '<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--mu);flex-shrink:0;">'+e.t+'</span>'+
+      '<span style="font-size:13px;font-weight:500;color:var(--tx);">'+e.msg+'</span>'+
+    '</div>';
+  }).join('');
+}
+function openWasteSheet(){
+  showScreen('sWaste');
+  renderWasteScreen();
+}
+function renderWasteScreen(){
+  var list=document.getElementById('wasteScreenList');
+  var empty=document.getElementById('wasteScreenEmpty');
+  if(!list||!empty)return;
+  // Update headers
+  var dh=document.getElementById('wasteDateHeader');
+  var lh=document.getElementById('wasteLocHeader');
+  var now=new Date();
+  if(dh)dh.textContent=now.toLocaleDateString('en',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(lh)lh.textContent='📍 '+(LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc||'');
+  var todayKey=dk(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  var todayWaste=(S.waste||[]).filter(function(w){return w.date===todayKey;});
+  if(!todayWaste.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  var reasonLabels={spoiled:'Spoiled',expired:'Expired',prep:'Prep Error',other:'Other'};
+  var html='<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:420px;">'+
+    '<thead>'+
+      '<tr style="background:var(--s2);">'+
+        '<th style="padding:8px 10px;text-align:left;font-family:\'DM Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);border:1px solid var(--b1);">Time</th>'+
+        '<th style="padding:8px 10px;text-align:left;font-family:\'DM Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);border:1px solid var(--b1);">Food Item</th>'+
+        '<th style="padding:8px 10px;text-align:left;font-family:\'DM Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);border:1px solid var(--b1);">Qty</th>'+
+        '<th style="padding:8px 10px;text-align:left;font-family:\'DM Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);border:1px solid var(--b1);">Reason</th>'+
+        '<th style="padding:8px 10px;text-align:left;font-family:\'DM Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);border:1px solid var(--b1);">Name</th>'+
+      '</tr>'+
+    '</thead>'+
+    '<tbody>';
+  todayWaste.forEach(function(w){
+    var reasonColor={spoiled:'var(--red)',expired:'var(--acc)',prep:'var(--cold)',other:'var(--tx2)'};
+    html+=
+      '<tr style="border-bottom:1px solid var(--b1);">'+
+        '<td style="padding:9px 10px;border:1px solid var(--b1);font-family:\'DM Mono\',monospace;font-size:11px;color:var(--mu);white-space:nowrap;">'+w.time+'</td>'+
+        '<td style="padding:9px 10px;border:1px solid var(--b1);font-weight:600;color:var(--tx);">'+w.item+'</td>'+
+        '<td style="padding:9px 10px;border:1px solid var(--b1);font-family:\'DM Mono\',monospace;font-weight:700;color:var(--red);white-space:nowrap;">'+w.qty+'</td>'+
+        '<td style="padding:9px 10px;border:1px solid var(--b1);"><span style="font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(0,0,0,.15);color:'+reasonColor[w.reason]+'">'+reasonLabels[w.reason]+'</span></td>'+
+        '<td style="padding:9px 10px;border:1px solid var(--b1);color:var(--tx2);font-size:12px;">'+w.by+'</td>'+
+      '</tr>';
+  });
+  html+='</tbody></table></div>';
+  list.innerHTML=html;
+}
+
 // ============================================================
 // WASTE LOG
 // ============================================================
@@ -1675,7 +1803,6 @@ function logWaste(){
   if(!qty){showToast('Enter a quantity',true);return;}
   var now=new Date();
   var entry={
-    id:'w'+Date.now(),
     item:item,
     qty:qty,
     reason:reason,
@@ -1684,36 +1811,16 @@ function logWaste(){
     time:now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}),
     ts:Date.now()
   };
-  var list=Array.isArray(S.waste)?S.waste.slice():[];
-  list.unshift(entry);
-  db.ref(cLoc+'/waste').set(list).then(function(){
+  setSyncStatus('syncing');
+  db.ref(cLoc+'/waste').push(entry).then(function(){
     setSyncStatus('on');
     closeWasteModal();
     showToast('🗑️ Waste logged');
-    switchTab('waste');
-  }).catch(function(e){setSyncStatus('off');console.error(e);});
+    // If waste screen is open, refresh it
+    if(document.getElementById('sWaste').classList.contains('active')) renderWasteScreen();
+  }).catch(function(e){setSyncStatus('off');console.error(e);showToast('Error saving',true);});
 }
-function renderWaste(){
-  var list=document.getElementById('wasteList');
-  var empty=document.getElementById('wasteEmpty');
-  if(!list||!empty)return;
-  var todayKey=dk(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
-  // Show today's waste, sorted newest first
-  var todayWaste=(S.waste||[]).filter(function(w){return w.date===todayKey;});
-  if(!todayWaste.length){list.innerHTML='';empty.style.display='block';return;}
-  empty.style.display='none';
-  var reasonLabels={spoiled:'Spoiled',expired:'Expired',prep:'Prep Error',other:'Other'};
-  list.innerHTML=todayWaste.map(function(w){
-    return '<div class="waste-row">'+
-      '<div class="waste-info">'+
-        '<div class="waste-item">'+w.item+'</div>'+
-        '<div class="waste-meta">'+w.by+' · '+w.time+'</div>'+
-        '<span class="waste-reason '+w.reason+'">'+reasonLabels[w.reason]+'</span>'+
-      '</div>'+
-      '<div class="waste-qty">'+w.qty+'</div>'+
-    '</div>';
-  }).join('');
-}
+// waste render is now renderWasteScreen() above
 
 // ============================================================
 // REPORT DOWNLOAD — includes prep + waste
