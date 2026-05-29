@@ -925,16 +925,24 @@ function doLogin(){
   var pin  = document.getElementById('lpin').value.trim();
   document.getElementById('lerr').style.display = 'none';
 
-  // Check super admin first (no location restriction)
+  // Super admin
   if(name === SUPER_ADMIN.name.toLowerCase() && pin === SUPER_ADMIN.pin){
     cUser = { id:'super', name: SUPER_ADMIN.name, role:'super', stn:'hot', color: SUPER_ADMIN.color };
-    // Super admin defaults to vaughan but can switch
     if(!cLoc) cLoc = 'vaughan';
     afterLogin();
     return;
   }
 
-  // Check location staff
+  // If employees not loaded yet, reload from Firebase first then retry
+  if(!S.emps.length){
+    db.ref(cLoc+'/emps').once('value', function(snap){
+      var data = snap.val();
+      if(data && Array.isArray(data) && data.length) S.emps = data;
+      doLogin();
+    }).catch(function(){ document.getElementById('lerr').style.display='block'; });
+    return;
+  }
+
   var emp = null;
   for(var i=0;i<S.emps.length;i++){
     if(S.emps[i].name.toLowerCase()===name && S.emps[i].pin===pin){ emp=S.emps[i]; break; }
@@ -1199,7 +1207,9 @@ function addEmp(){
   var dup=false;for(var i=0;i<S.emps.length;i++){if(S.emps[i].name.toLowerCase()===name.toLowerCase()){dup=true;break;}}
   if(dup){showToast('Name already exists',true);return;}
   var newEmp={id:'e'+Date.now(),name:name,pin:pin,stn:stn,role:role,color:COLORS[S.emps.length%COLORS.length]};
-  fbSet('emps',S.emps.concat([newEmp]));
+  S.emps = S.emps.concat([newEmp]); // update locally immediately
+  fbSet('emps', S.emps);
+  renderRoster();
   document.getElementById('nName').value='';document.getElementById('nPin').value='';
   showToast(name+' added!');showAPage('roster',document.getElementById('abn-roster'));
 }
