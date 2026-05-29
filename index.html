@@ -887,18 +887,33 @@ function fbSetShared(path,data){ setSyncStatus('syncing'); return db.ref('shared
 function selectLocation(loc){
   cLoc = loc;
   document.getElementById('loginLocLabel').textContent = '📍 ' + LOCATIONS[loc].name;
-  // Load employees for this location immediately so login works
   S.emps = [];
-  db.ref(cLoc+'/emps').once('value', function(snap){
-    var data = snap.val();
-    if(data && Array.isArray(data) && data.length){
-      S.emps = data;
-    } else {
-      // First time — seed defaults
-      db.ref(cLoc+'/emps').set(DEFAULT_EMPS[cLoc]);
-      S.emps = DEFAULT_EMPS[cLoc].slice();
-    }
-  });
+
+  function loadEmps(){
+    db.ref(cLoc+'/emps').once('value', function(snap){
+      var data = snap.val();
+      if(data && Array.isArray(data) && data.length){
+        S.emps = data;
+      } else {
+        db.ref(cLoc+'/emps').set(DEFAULT_EMPS[cLoc]);
+        S.emps = DEFAULT_EMPS[cLoc].slice();
+      }
+    }).catch(function(){
+      // Auth not ready yet — retry in 500ms
+      setTimeout(loadEmps, 500);
+    });
+  }
+
+  // If already authenticated load immediately, otherwise wait
+  if(firebase.auth().currentUser){
+    loadEmps();
+  } else {
+    var unsub = firebase.auth().onAuthStateChanged(function(user){
+      unsub();
+      if(user) loadEmps();
+    });
+  }
+
   showScreen('sLogin');
 }
 
