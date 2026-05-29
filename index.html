@@ -1106,8 +1106,11 @@ function addLog(msg){
 function prevMonth(){calM--;if(calM<0){calM=11;calY--;}buildCal();}
 function nextMonth(){calM++;if(calM>11){calM=0;calY++;}buildCal();}
 function buildCal(){
-  document.getElementById('calLbl').textContent=MONTHS[calM]+' '+calY;
-  var g=document.getElementById('calGrid'),html='';
+  var lblEl = document.getElementById('actCalLbl');
+  var g = document.getElementById('actCalGrid');
+  if(lblEl) lblEl.textContent = MONTHS[calM]+' '+calY;
+  if(!g) return;
+  var html='';
   var tDK=dk(today.getFullYear(),today.getMonth(),today.getDate());
   var sDK=dk(selY,selM,selD);
   DNAMES.forEach(function(d){html+='<div class="cal-dhdr">'+d+'</div>';});
