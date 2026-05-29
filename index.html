@@ -387,6 +387,21 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 .rec-header{flex-shrink:0;height:52px;background:var(--s1);border-bottom:2px solid var(--b2);padding:0 14px;display:flex;align-items:center;justify-content:space-between;}
 .rec-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--acc);}
 .rec-search-wrap{padding:10px 12px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+/* RECIPE SCALING */
+.scale-section{margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);}
+.scale-hdr{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--acc);margin-bottom:10px;}
+.scale-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.scale-input{width:80px;background:var(--s2);border:1.5px solid var(--acc);color:var(--tx);padding:7px 10px;border-radius:8px;font-size:16px;font-family:'DM Mono',monospace;text-align:center;-webkit-appearance:none;-moz-appearance:textfield;}
+.scale-input::-webkit-outer-spin-button,
+.scale-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.scale-unit{font-family:'DM Mono',monospace;font-size:12px;color:var(--tx2);}
+.scale-base{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);}
+.scale-ing-table{width:100%;border-collapse:collapse;}
+.scale-ing-table td{padding:6px 8px;border-bottom:1px solid var(--b1);font-size:13px;}
+.scale-ing-table td:first-child{color:var(--tx);font-weight:500;}
+.scale-ing-table td:last-child{color:var(--acc);font-family:'DM Mono',monospace;font-weight:700;text-align:right;white-space:nowrap;}
+.scale-multiplier{font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:8px;background:rgba(245,166,35,.12);color:var(--acc);border:1px solid rgba(245,166,35,.3);}
+
 .rec-body{flex:1;overflow-y:auto;padding:12px;}
 .rec-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:10px;overflow:hidden;}
 .rec-card-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:8px;}
@@ -785,13 +800,16 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
   <div class="mbox" style="max-width:500px;">
     <div class="mttl" id="recModalTitle">ADD RECIPE</div>
     <input id="recName" class="lf" type="text" placeholder="Recipe name" autocorrect="off" style="margin-bottom:8px;">
-    <select id="recCat" class="lf" style="margin-bottom:8px;background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:11px 12px;border-radius:9px;font-size:16px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;width:100%;">
-      <option value="sauces">Sauces / Dressings / Dips</option>
-      <option value="proteins">Proteins</option>
-      <option value="salads">Salads / Vegetables</option>
-      <option value="other">Other</option>
-    </select>
-    <textarea id="recIngredients" class="lf" placeholder="Ingredients (one per line)" rows="8" style="resize:vertical;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;"></textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <select id="recCat" class="lf" style="background:var(--s2);border:1.5px solid var(--b2);color:var(--tx);padding:11px 12px;border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;-webkit-appearance:none;width:100%;">
+        <option value="sauces">Sauces / Dressings / Dips</option>
+        <option value="proteins">Proteins</option>
+        <option value="salads">Salads / Vegetables</option>
+        <option value="other">Other</option>
+      </select>
+      <input id="recYield" class="lf" type="text" placeholder="Base yield e.g. 1 kg" autocorrect="off" style="margin-bottom:0;">
+    </div>
+    <textarea id="recIngredients" class="lf" placeholder="Ingredients — one per line&#10;Format: Name — Qty Unit&#10;e.g. Olive Oil — 50 ml" rows="8" style="resize:vertical;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;"></textarea>
     <div class="mbtns">
       <button class="mc" onclick="closeRecModal()">Cancel</button>
       <button class="mk" onclick="saveRecipe()">Save</button>
@@ -1620,20 +1638,114 @@ function renderRecipes(){
   var html='';
   recs.forEach(function(r){
     var tag=cats[r.cat]||r.cat;
-    var ings=r.ingredients.split('\n').filter(function(l){return l.trim();}).map(function(l){return'<li>'+l.trim()+'</li>';}).join('');
     var canEdit=cUser&&(cUser.role==='super'||cUser.role==='manager'||cUser.role==='km');
     var adminBtns=canEdit?'<div class="rec-actions"><button class="btn sm acc" onclick="editRecipe(\''+r.id+'\');event.stopPropagation()">Edit</button><button class="btn sm danger" onclick="deleteRecipe(\''+r.id+'\');event.stopPropagation()">Delete</button></div>':'';
-    html+='<div class="rec-card" id="rc-'+r.id+'"><div class="rec-card-hdr" onclick="toggleRecCard(\''+r.id+'\')"><div class="rec-card-name">'+r.name+'</div><span class="rec-card-tag '+r.cat+'">'+tag+'</span></div><div class="rec-card-body" id="rcb-'+r.id+'"><ul class="rec-ing">'+ings+'</ul>'+adminBtns+'</div></div>';
+    var ings=r.ingredients.split('\n').filter(function(l){return l.trim();}).map(function(l){return'<li>'+l.trim()+'</li>';}).join('');
+    var defaultOld=r.yield||'';
+    var scaleSec=
+      '<div class="scale-section">'+
+        '<div class="scale-hdr">⚖️ SCALE RECIPE</div>'+
+        '<div class="scale-row">'+
+          '<div style="display:flex;flex-direction:column;gap:4px;align-items:center;">'+
+            '<span class="scale-base">Original yield</span>'+
+            '<input class="scale-input" id="so-'+r.id+'" type="number" min="0.01" step="any" placeholder="e.g. 400" value="'+defaultOld+'" oninput="updateScale(\''+r.id+'\')">'+
+          '</div>'+
+          '<span style="font-size:22px;color:var(--mu);padding:0 4px;margin-top:14px;">→</span>'+
+          '<div style="display:flex;flex-direction:column;gap:4px;align-items:center;">'+
+            '<span class="scale-base">New yield</span>'+
+            '<input class="scale-input" id="sn-'+r.id+'" type="number" min="0.01" step="any" placeholder="e.g. 648" oninput="updateScale(\''+r.id+'\')">'+
+          '</div>'+
+          '<span class="scale-multiplier" id="sm-'+r.id+'" style="margin-top:14px;">× —</span>'+
+        '</div>'+
+        '<table class="scale-ing-table" id="st-'+r.id+'"></table>'+
+      '</div>';
+    html+=
+      '<div class="rec-card" id="rc-'+r.id+'">'+
+        '<div class="rec-card-hdr" onclick="toggleRecCard(\''+r.id+'\')">'+
+          '<div class="rec-card-name">'+r.name+'</div>'+
+          '<span class="rec-card-tag '+r.cat+'">'+tag+'</span>'+
+        '</div>'+
+        '<div class="rec-card-body" id="rcb-'+r.id+'">'+
+          '<ul class="rec-ing">'+ings+'</ul>'+
+          scaleSec+
+          adminBtns+
+        '</div>'+
+      '</div>';
   });
   el.innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--mu);font-family:\'DM Mono\',monospace;font-size:12px;">No recipes yet.</div>';
 }
-function toggleRecCard(id){var body=document.getElementById('rcb-'+id);if(body)body.classList.toggle('open');}
+function toggleRecCard(id){
+  var body=document.getElementById('rcb-'+id);
+  if(body)body.classList.toggle('open');
+}
+
+function parseIngredients(text){
+  return text.split('\n').filter(function(l){return l.trim();}).map(function(line){
+    line=line.trim();
+    // Try to match "Name — Qty Unit" or "Name - Qty Unit"
+    var match=line.match(/^(.+?)\s*[—\-–]+\s*([\d.\/]+)\s*(.*)$/);
+    if(match){
+      var qty=parseFloat(match[2].replace(/\//g,'.'));
+      return{name:match[1].trim(),qty:isNaN(qty)?null:qty,unit:match[3].trim(),raw:line,parseable:!isNaN(qty)};
+    }
+    return{name:line,qty:null,unit:'',raw:line,parseable:false};
+  });
+}
+
+function formatQty(n){
+  if(n===Math.round(n))return String(Math.round(n));
+  if(n<0.1)return n.toFixed(3).replace(/0+$/,'');
+  if(n<1)return n.toFixed(2).replace(/0+$/,'');
+  if(n<10)return n.toFixed(1).replace(/\.0$/,'');
+  return Math.round(n*10)/10+'';
+}
+
+function updateScale(id){
+  var oldInp=document.getElementById('so-'+id);
+  var newInp=document.getElementById('sn-'+id);
+  var table=document.getElementById('st-'+id);
+  var mult=document.getElementById('sm-'+id);
+  if(!oldInp||!newInp||!table)return;
+
+  var oldVal=parseFloat(oldInp.value);
+  var newVal=parseFloat(newInp.value);
+
+  if(!oldVal||!newVal||oldVal<=0||newVal<=0){
+    if(mult)mult.textContent='× —';
+    table.innerHTML='';
+    return;
+  }
+
+  var multiplier=newVal/oldVal;
+  var m=Math.round(multiplier*1000)/1000;
+
+  if(mult){
+    mult.textContent='× '+m;
+    mult.style.background=m===1?'rgba(102,187,106,.1)':m>1?'rgba(245,166,35,.15)':'rgba(66,165,245,.15)';
+    mult.style.color=m===1?'var(--grn)':m>1?'var(--acc)':'var(--cold)';
+    mult.style.borderColor=m===1?'rgba(102,187,106,.3)':m>1?'rgba(245,166,35,.3)':'rgba(66,165,245,.3)';
+  }
+
+  var recs=S.recipes&&S.recipes.length?S.recipes:RECIPES_DEFAULT;
+  var r=recs.find(function(x){return x.id===id;});
+  if(!r)return;
+
+  var parsed=parseIngredients(r.ingredients);
+  table.innerHTML=parsed.map(function(ing){
+    if(!ing.parseable){
+      return '<tr><td colspan="2" style="color:var(--tx2);font-style:italic;font-size:12px;">'+ing.raw+'</td></tr>';
+    }
+    var scaled=ing.qty*multiplier;
+    return '<tr><td>'+ing.name+'</td><td>'+formatQty(scaled)+' '+ing.unit+'</td></tr>';
+  }).join('');
+}
 function filterRecipes(q){q=q.toLowerCase().trim();document.querySelectorAll('.rec-card').forEach(function(card){var name=card.querySelector('.rec-card-name');if(!name)return;card.classList.toggle('hidden',!q||!name.textContent.toLowerCase().includes(q));});}
 function openAddRecipe(){
   recEditId=null;
   document.getElementById('recModalTitle').textContent='ADD RECIPE';
   document.getElementById('recName').value='';
   document.getElementById('recCat').value='sauces';
+  document.getElementById('recYield').value='';
   document.getElementById('recIngredients').value='';
   var m=document.getElementById('recModal');
   document.body.appendChild(m);
@@ -1646,17 +1758,26 @@ function editRecipe(id){
   document.getElementById('recModalTitle').textContent='EDIT RECIPE';
   document.getElementById('recName').value=r.name;
   document.getElementById('recCat').value=r.cat;
+  document.getElementById('recYield').value=r.yield||'';
   document.getElementById('recIngredients').value=r.ingredients;
   var m=document.getElementById('recModal');
   document.body.appendChild(m);
   m.style.display='flex';
 }
 function saveRecipe(){
-  var name=document.getElementById('recName').value.trim(),cat=document.getElementById('recCat').value,ingredients=document.getElementById('recIngredients').value.trim();
-  if(!name){showToast('Enter a recipe name',true);return;}if(!ingredients){showToast('Enter ingredients',true);return;}
+  var name=document.getElementById('recName').value.trim();
+  var cat=document.getElementById('recCat').value;
+  var yld=document.getElementById('recYield').value.trim();
+  var ingredients=document.getElementById('recIngredients').value.trim();
+  if(!name){showToast('Enter a recipe name',true);return;}
+  if(!ingredients){showToast('Enter ingredients',true);return;}
   var recs=S.recipes&&S.recipes.length?JSON.parse(JSON.stringify(S.recipes)):JSON.parse(JSON.stringify(RECIPES_DEFAULT));
-  if(recEditId){var idx=recs.findIndex(function(x){return x.id===recEditId;});if(idx>=0)recs[idx]={id:recEditId,name:name,cat:cat,ingredients:ingredients};}
-  else{recs.push({id:'r'+Date.now(),name:name,cat:cat,ingredients:ingredients});}
+  if(recEditId){
+    var idx=recs.findIndex(function(x){return x.id===recEditId;});
+    if(idx>=0)recs[idx]={id:recEditId,name:name,cat:cat,yield:yld,ingredients:ingredients};
+  } else {
+    recs.push({id:'r'+Date.now(),name:name,cat:cat,yield:yld,ingredients:ingredients});
+  }
   fbSet('shared/recipes',recs);closeRecModal();showToast(recEditId?'Recipe updated!':'Recipe added!');
 }
 function deleteRecipe(id){openMod('DELETE RECIPE','Are you sure you want to delete this recipe?',function(){var recs=S.recipes&&S.recipes.length?JSON.parse(JSON.stringify(S.recipes)):JSON.parse(JSON.stringify(RECIPES_DEFAULT));fbSet('shared/recipes',recs.filter(function(r){return r.id!==id;}));showToast('Recipe deleted');});}
