@@ -1730,7 +1730,7 @@ function renderActivityScreen(){
   var dateStr=new Date(selY,selM,selD).toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});
   if(lbl)lbl.textContent=dateStr;
   var d=curDK();
-  var entries=S.log.filter(function(e){return e.dt===d;});
+  var entries=(S.log||[]).filter(function(e){return e.dk===d;});
   if(!entries.length){logEl.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   logEl.innerHTML=entries.map(function(e){
