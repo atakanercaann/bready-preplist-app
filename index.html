@@ -815,13 +815,6 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
-
-// Wait for anonymous auth before starting — required by our security rules
-firebase.auth().onAuthStateChanged(function(user){
-  if(!user){
-    firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth error:', e); });
-  }
-});
 firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth error:', e); });
 
 // ============================================================
@@ -1869,16 +1862,12 @@ function downloadReport(){
 }
 
 // ============================================================
-// START — wait for Firebase auth before showing app
+// START
 // ============================================================
-firebase.auth().onAuthStateChanged(function(user){
-  if(user){
-    document.getElementById('sLoad').style.display='none';
-    showScreen('sLocation');
-  }
-});
-// Show load screen immediately while waiting
-document.getElementById('sLoad').style.display='flex';
+// Sign in anonymously in background — completes before any Firebase calls
+firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth error:', e); });
+document.getElementById('sLoad').style.display='none';
+showScreen('sLocation');
 </script>
 </body>
 </html>
