@@ -702,6 +702,8 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
     <button class="umenu-item" onclick="closeUserMenu();openRecipes();"><span class="mi-ico">📖</span><div><div class="mi-lbl">Recipes</div><div class="mi-sub">View all prep recipes</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();openActivitySheet();"><span class="mi-ico">📋</span><div><div class="mi-lbl">Activity Log</div><div class="mi-sub">Today's prep activity</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();openWasteSheet();"><span class="mi-ico">🗑️</span><div><div class="mi-lbl">Waste Log</div><div class="mi-sub">Log & view food waste</div></div></button>
+    <button class="umenu-item" id="umMsgBtn" onclick="closeUserMenu();openMessageCompose();"><span class="mi-ico">✉️</span><div><div class="mi-lbl">Message Admin</div><div class="mi-sub">Send a message to manager</div></div></button>
+    <button class="umenu-item" id="umInboxBtn" onclick="closeUserMenu();openInbox();" style="display:none;"><span class="mi-ico" style="position:relative;">📬<span id="inboxBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:50%;width:16px;height:16px;align-items:center;justify-content:center;font-family:'DM Mono',monospace;"></span></span><div><div class="mi-lbl">Inbox <span id="inboxCount" style="font-size:11px;color:var(--red);font-weight:700;"></span></div><div class="mi-sub">Messages from staff</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();openChangePIN();"><span class="mi-ico">🔑</span><div><div class="mi-lbl">Change My PIN</div><div class="mi-sub">Update your 4-digit code</div></div></button>
     <button class="umenu-item" onclick="closeUserMenu();toggleTheme();"><span class="mi-ico" id="themeIcon">☀️</span><div><div class="mi-lbl" id="themeLabel">Light Mode</div><div class="mi-sub" id="themeSub">Switch to light theme</div></div></button>
     <div class="umenu-divider" style="margin:8px 0;"></div>
@@ -1065,6 +1067,7 @@ function openApp(){
   initLocationData();
   showScreen('sApp');
   buildCal();renderAll();renderLog();updateDateNav();
+  initMessaging();
 }
 
 // Super admin switches location
@@ -1992,10 +1995,137 @@ function downloadReport(){
 }
 
 // ============================================================
+// MESSAGING
+// ============================================================
+function openMessageCompose(){
+  document.getElementById('msgText').value='';
+  var m=document.getElementById('msgComposeModal');
+  document.body.appendChild(m);
+  m.style.display='flex';
+  setTimeout(function(){document.getElementById('msgText').focus();},100);
+}
+
+function sendMessage(){
+  var text=document.getElementById('msgText').value.trim();
+  if(!text){showToast('Write a message first',true);return;}
+  var msg={
+    id:'msg'+Date.now(),
+    from:cUser.name,
+    location:LOCATIONS[cLoc]?LOCATIONS[cLoc].name:cLoc,
+    text:text,
+    time:new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}),
+    date:new Date().toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'}),
+    ts:Date.now(),
+    read:false
+  };
+  db.ref('admin_messages').push(msg).then(function(){
+    document.getElementById('msgComposeModal').style.display='none';
+    showToast('Message sent ✉️');
+  }).catch(function(e){showToast('Failed to send',true);console.error(e);});
+}
+
+function openInbox(){
+  showScreen('sInbox');
+  renderInbox();
+  // Mark all as read
+  db.ref('admin_messages').once('value',function(snap){
+    var msgs=snap.val();
+    if(!msgs)return;
+    var updates={};
+    Object.keys(msgs).forEach(function(k){if(!msgs[k].read)updates[k+'/read']=true;});
+    if(Object.keys(updates).length)db.ref('admin_messages').update(updates);
+  });
+}
+
+function renderInbox(){
+  var list=document.getElementById('inboxList');
+  var empty=document.getElementById('inboxEmpty');
+  if(!list||!empty)return;
+  db.ref('admin_messages').orderByChild('ts').once('value',function(snap){
+    var msgs=snap.val();
+    if(!msgs){list.innerHTML='';empty.style.display='block';return;}
+    var arr=Object.values(msgs).sort(function(a,b){return b.ts-a.ts;});
+    empty.style.display='none';
+    list.innerHTML=arr.map(function(m){
+      var unread=!m.read?'border-left:3px solid var(--acc);':'border-left:3px solid var(--b1);';
+      return '<div style="background:var(--s1);'+unread+'border-radius:10px;padding:12px 14px;margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+          '<div style="font-weight:700;font-size:14px;color:var(--tx);">'+m.from+'</div>'+
+          '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--mu);">'+m.date+' · '+m.time+'</div>'+
+        '</div>'+
+        '<div style="font-size:11px;font-family:\'DM Mono\',monospace;color:var(--acc);margin-bottom:6px;">📍 '+m.location+'</div>'+
+        '<div style="font-size:14px;color:var(--tx2);line-height:1.6;">'+m.text+'</div>'+
+      '</div>';
+    }).join('');
+  });
+}
+
+function clearInbox(){
+  openMod('Clear Inbox','Delete all messages?',function(){
+    db.ref('admin_messages').remove().then(function(){
+      renderInbox();
+      showToast('Inbox cleared');
+    });
+  });
+}
+
+function initMessaging(){
+  var inboxBtn=document.getElementById('umInboxBtn');
+  var msgBtn=document.getElementById('umMsgBtn');
+  // Super admin sees inbox, hides compose; others see compose only
+  if(cUser&&cUser.role==='super'){
+    if(inboxBtn)inboxBtn.style.display='flex';
+    if(msgBtn)msgBtn.style.display='none';
+    // Watch for unread messages
+    db.ref('admin_messages').on('value',function(snap){
+      var msgs=snap.val()||{};
+      var unread=Object.values(msgs).filter(function(m){return!m.read;}).length;
+      var badge=document.getElementById('inboxBadge');
+      var count=document.getElementById('inboxCount');
+      if(badge){badge.textContent=unread;badge.style.display=unread?'flex':'none';}
+      if(count)count.textContent=unread?'('+unread+' new)':'';
+    });
+  } else {
+    if(inboxBtn)inboxBtn.style.display='none';
+    if(msgBtn)msgBtn.style.display='flex';
+  }
+}
+
+// ============================================================
 // START
 // ============================================================
 document.getElementById('sLoad').style.display='none';
 showScreen('sLocation');
 </script>
+<!-- MESSAGE COMPOSE MODAL -->
+<div class="mov" id="msgComposeModal" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:flex-end;justify-content:center;">
+  <div class="mbox" style="max-width:500px;">
+    <div class="mttl" style="color:var(--acc);">✉️ MESSAGE ADMIN</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);margin-bottom:10px;">Only visible to Galatasaray</div>
+    <textarea id="msgText" class="lf" placeholder="Type your message..." rows="5" style="resize:none;font-size:14px;line-height:1.7;margin-bottom:8px;"></textarea>
+    <div class="mbtns">
+      <button class="mc" onclick="document.getElementById('msgComposeModal').style.display='none'">Cancel</button>
+      <button class="mk" onclick="sendMessage()">Send ✉️</button>
+    </div>
+  </div>
+</div>
+
+<!-- INBOX SCREEN -->
+<div id="sInbox" class="screen">
+  <div class="rec-header app-fixed" style="border-bottom-color:var(--acc);">
+    <div class="rec-title" style="color:var(--acc);">📬 INBOX</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn sm danger" id="clearInboxBtn" onclick="clearInbox()">Clear All</button>
+      <button class="btn sm" onclick="showScreen('sApp')">← Back</button>
+    </div>
+  </div>
+  <div class="rec-body app-body" style="padding:14px;" id="inboxBody">
+    <div id="inboxList"></div>
+    <div id="inboxEmpty" style="text-align:center;padding:48px 20px;color:var(--mu);font-family:'DM Mono',monospace;font-size:13px;">
+      <div style="font-size:32px;margin-bottom:10px;">📭</div>No messages yet.
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
